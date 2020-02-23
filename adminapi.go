@@ -19,7 +19,7 @@ type adminAPI struct {
 func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
-		f, err := os.Open(filepath.Join(a.conf.ContentPath, req.URL.Path))
+		f, err := os.Open(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
 		if err != nil {
 			log.Println(err)
 			http.Error(res, jsonStatusNotFound, http.StatusNotFound)
@@ -46,7 +46,7 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, jsonStatusBadRequest, http.StatusBadRequest)
 			return
 		}
-		f, err := os.OpenFile(filepath.Join(a.conf.ContentPath, req.URL.Path), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(0644))
+		f, err := os.OpenFile(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(0644))
 		if err != nil {
 			log.Println(err)
 			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
@@ -83,7 +83,7 @@ type fileInfo struct {
 func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
-		files, err := ioutil.ReadDir(filepath.Join(a.conf.ContentPath, req.URL.Path))
+		files, err := ioutil.ReadDir(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
 		if err != nil {
 			log.Println(err)
 			http.Error(res, jsonStatusNotFound, http.StatusNotFound)
@@ -106,7 +106,7 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 	case "POST":
-		err := os.MkdirAll(filepath.Join(a.conf.ContentPath, req.URL.Path), os.FileMode(0755))
+		err := os.MkdirAll(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)), os.FileMode(0755))
 		if err != nil {
 			log.Println(err)
 			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
