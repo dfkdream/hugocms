@@ -33,9 +33,9 @@ func main() {
 
 	rAdmin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)
 
-	admin{signIn: signin, t: t}.setupAdminHandlers(rAdmin)
+	admin{signIn: signin, t: t}.setupHandlers(rAdmin)
 
-	adminAPI{conf: cfg}.setupAdminAPIHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
+	adminAPI{conf: cfg}.setupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir(cfg.PublicPath)))
 

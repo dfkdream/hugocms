@@ -108,7 +108,7 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a adminAPI) setupAdminAPIHandlers(router *mux.Router) {
+func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			res.Header().Set("Content-Type", "application/json")
