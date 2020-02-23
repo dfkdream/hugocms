@@ -27,6 +27,7 @@ func main() {
 	signin := newSignInHandler(
 		"/admin/signin/",
 		"/admin/assets/",
+		"/admin/api/",
 		newSessionDB(true, 10*time.Minute),
 		newUserDB(),
 		t)

@@ -37,15 +37,17 @@ func readIP(req *http.Request) string {
 type signInHandler struct {
 	signInURL string
 	assetsURL string
+	apiURL    string
 	sessionDB *sessionDB
 	userDB    *userDB
 	template  *template.Template
 }
 
-func newSignInHandler(signInURL, assetsURL string, sessionDB *sessionDB, userDB *userDB, template *template.Template) *signInHandler {
+func newSignInHandler(signInURL, assetsURL, apiURL string, sessionDB *sessionDB, userDB *userDB, template *template.Template) *signInHandler {
 	return &signInHandler{
 		signInURL: signInURL,
 		assetsURL: assetsURL,
+		apiURL:    apiURL,
 		sessionDB: sessionDB,
 		userDB:    userDB,
 		template:  template,
@@ -63,6 +65,11 @@ func (s signInHandler) middleware(next http.Handler) http.Handler {
 		if ok, user := s.sessionDB.validate(mustReadCookie("sess", req), readIP(req)); ok {
 			req = req.WithContext(context.WithValue(req.Context(), contextKeyUser, user))
 			next.ServeHTTP(res, req)
+			return
+		}
+
+		if strings.HasPrefix(req.URL.Path, s.apiURL) {
+			http.Error(res, jsonStatusUnauthorized, http.StatusUnauthorized)
 			return
 		}
 
