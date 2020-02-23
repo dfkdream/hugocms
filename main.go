@@ -31,28 +31,11 @@ func main() {
 		newUserDB(),
 		t)
 
-	admin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)
+	rAdmin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)
 
-	admin.Use(signin.middleware)
+	admin{signIn: signin, t: t}.setupAdminHandlers(rAdmin)
 
-	admin.PathPrefix("/assets").Handler(
-		http.StripPrefix("/admin/assets/", http.FileServer(http.Dir("./assets"))))
-
-	admin.Handle("/signin/", signin)
-
-	admin.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
-		http.Redirect(res, req, "/admin/list/", http.StatusFound)
-	})
-
-	admin.HandleFunc("/list/", func(res http.ResponseWriter, req *http.Request) {
-		err := t.ExecuteTemplate(res, "list.html", nil)
-		if err != nil {
-			log.Println(err)
-			http.Redirect(res, req, "/admin/list/", http.StatusFound)
-		}
-	})
-
-	adminAPI{conf: cfg}.setupAdminAPIHandlers(admin.PathPrefix("/api").Subrouter().StrictSlash(true))
+	adminAPI{conf: cfg}.setupAdminAPIHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir(cfg.PublicPath)))
 
