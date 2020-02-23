@@ -8,16 +8,17 @@ import (
 
 func TestFrontMatter_String(t *testing.T) {
 	f := frontMatter{
-		Title:           "Hello world!",
+		Title:           "hello world",
 		Subtitle:        "",
 		Date:            time.Now(),
 		Author:          "John Doe",
+		Attachments:     []string{"./hello.png", "./world.png"},
 		ShowReadingTime: true,
 		ShowLanguages:   true,
 		ShowAuthor:      true,
 		ShowDate:        true,
 	}
-	t.Log(f)
+	t.Log("\n", f)
 }
 
 func TestParseArticle(t *testing.T) {
@@ -26,8 +27,7 @@ func TestParseArticle(t *testing.T) {
 		t.Log(err)
 		t.FailNow()
 	}
-	fm, body, err := parseArticle(f)
-	t.Log(fm)
-	t.Log(body)
+	a, err := parseArticle(f)
+	t.Log(a)
 	t.Log(err)
 }
