@@ -14,10 +14,16 @@ type frontMatter struct {
 	Subtitle        string    `json:"subtitle"`
 	Date            time.Time `json:"date"`
 	Author          string    `json:"author"`
+	Attachments     []string  `json:"attachments"`
 	ShowReadingTime bool      `json:"showReadingTime"`
 	ShowLanguages   bool      `json:"showLanguages"`
 	ShowAuthor      bool      `json:"showAuthor"`
 	ShowDate        bool      `json:"showDate"`
+}
+
+type article struct {
+	FrontMatter frontMatter `json:"frontMatter"`
+	Body        string      `json:"body"`
 }
 
 func (f frontMatter) String() string {
@@ -25,16 +31,16 @@ func (f frontMatter) String() string {
 	return string(res)
 }
 
-func parseArticle(reader io.Reader) (frontMatter, string, error) {
+func parseArticle(reader io.Reader) (*article, error) {
 	var result frontMatter
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return frontMatter{}, "", err
+		return nil, err
 	}
 	err = json.NewDecoder(bytes.NewReader(body)).Decode(&result)
 	if err != nil {
-		return frontMatter{}, "", err
+		return nil, err
 	}
-	article := strings.TrimSpace(strings.TrimPrefix(string(body), result.String()))
-	return result, article, nil
+	bString := strings.TrimSpace(strings.TrimPrefix(string(body), result.String()))
+	return &article{FrontMatter: result, Body: bString}, nil
 }
