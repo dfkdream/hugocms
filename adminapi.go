@@ -101,8 +101,16 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Println(err)
 			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
 		}
 	case "POST":
+		err := os.MkdirAll(filepath.Join(a.conf.ContentPath, req.URL.Path), os.FileMode(0755))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+	case "PUT":
 	default:
 		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
