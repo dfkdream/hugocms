@@ -45,7 +45,7 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, jsonStatusBadRequest, http.StatusBadRequest)
 			return
 		}
-		f, err := os.OpenFile(filepath.Join(a.conf.ContentPath, req.URL.Path), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(666))
+		f, err := os.OpenFile(filepath.Join(a.conf.ContentPath, req.URL.Path), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(0644))
 		if err != nil {
 			log.Println(err)
 			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
