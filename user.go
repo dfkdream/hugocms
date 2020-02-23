@@ -37,11 +37,6 @@ type user struct {
 	salt     string
 }
 
-func userFromContext(ctx context.Context) (*user, bool) {
-	u, ok := ctx.Value(contextKeyUser).(*user)
-	return u, ok
-}
-
 func newUser(id, username, password string) (*user, error) {
 	u := user{id: id, username: username}
 	var err error
