@@ -25,6 +25,7 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, jsonStatusNotFound, http.StatusNotFound)
 			return
 		}
+		defer f.Close()
 		a, err := parseArticle(f)
 		if err != nil {
 			log.Println(err)
@@ -51,6 +52,7 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
+		defer f.Close()
 		jsonEnc := json.NewEncoder(f)
 		jsonEnc.SetIndent("", "    ")
 		err = jsonEnc.Encode(articleJSON.FrontMatter)
