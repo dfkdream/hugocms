@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -118,6 +119,20 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (a adminAPI) blobAPI(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		if strings.HasSuffix("/", req.URL.Path) {
+			http.Error(res, "404 page not found", http.StatusNotFound)
+			return
+		}
+		res.Header().Del("Content-Type")
+		http.ServeFile(res, req, filepath.Clean("/"+req.URL.Path))
+	default:
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
 func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -125,6 +140,8 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 			next.ServeHTTP(res, req)
 		})
 	})
+
 	router.PathPrefix("/post").Handler(http.StripPrefix("/admin/api/post", http.HandlerFunc(a.postAPI)))
 	router.PathPrefix("/list").Handler(http.StripPrefix("/admin/api/list", http.HandlerFunc(a.listAPI)))
+	router.PathPrefix("/blob").Handler(http.StripPrefix("/admin/api/blob", http.HandlerFunc(a.blobAPI)))
 }
