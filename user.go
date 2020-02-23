@@ -1,16 +1,10 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"sync"
 
 	"golang.org/x/crypto/scrypt"
-)
-
-var (
-	errDuplicatedUser = errors.New("duplicated user found")
 )
 
 func hashPassword(password string) (string, string, error) {
