@@ -22,24 +22,51 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 		f, err := os.Open(filepath.Join(a.conf.ContentPath, req.URL.Path))
 		if err != nil {
 			log.Println(err)
-			http.Error(res, "Not Found", http.StatusNotFound)
+			http.Error(res, jsonStatusNotFound, http.StatusNotFound)
 			return
 		}
 		a, err := parseArticle(f)
 		if err != nil {
 			log.Println(err)
-			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(res, jsonStatusNotFound, http.StatusInternalServerError)
 			return
 		}
 		err = json.NewEncoder(res).Encode(a)
 		if err != nil {
 			log.Println(err)
-			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
 	case "POST":
+		var articleJSON article
+		err := json.NewDecoder(req.Body).Decode(&articleJSON)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusBadRequest, http.StatusBadRequest)
+			return
+		}
+		f, err := os.OpenFile(filepath.Join(a.conf.ContentPath, req.URL.Path), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(666))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		jsonEnc := json.NewEncoder(f)
+		jsonEnc.SetIndent("", "    ")
+		err = jsonEnc.Encode(articleJSON.FrontMatter)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		_, err = f.Write([]byte(articleJSON.Body))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
 	default:
-		http.Error(res, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -57,7 +84,7 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 		files, err := ioutil.ReadDir(filepath.Join(a.conf.ContentPath, req.URL.Path))
 		if err != nil {
 			log.Println(err)
-			http.Error(res, "Not Found", http.StatusNotFound)
+			http.Error(res, jsonStatusNotFound, http.StatusNotFound)
 			return
 		}
 		fJSON := make([]fileInfo, len(files))
@@ -73,11 +100,11 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 		err = json.NewEncoder(res).Encode(fJSON)
 		if err != nil {
 			log.Println(err)
-			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
 		}
 	case "POST":
 	default:
-		http.Error(res, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
