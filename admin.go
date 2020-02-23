@@ -13,7 +13,7 @@ type admin struct {
 	t      *template.Template
 }
 
-func (a admin) setupAdminHandlers(router *mux.Router) {
+func (a admin) setupHandlers(router *mux.Router) {
 	router.Use(a.signIn.middleware)
 
 	router.PathPrefix("/assets").Handler(
