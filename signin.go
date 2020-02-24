@@ -69,7 +69,7 @@ func (s signInHandler) middleware(next http.Handler) http.Handler {
 		}
 
 		if strings.HasPrefix(req.URL.Path, s.apiURL) {
-			http.Error(res, jsonStatusUnauthorized, http.StatusUnauthorized)
+			http.Error(res, jsonStatusForbidden, http.StatusForbidden)
 			return
 		}
 
