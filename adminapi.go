@@ -133,6 +133,23 @@ func (a adminAPI) blobAPI(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (a adminAPI) whoamiAPI(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		if u, ok := req.Context().Value(contextKeyUser).(*user); ok {
+			err := json.NewEncoder(res).Encode(u)
+			if err != nil {
+				log.Println(err)
+				http.Error(res, jsonStatusForbidden, http.StatusForbidden)
+			}
+			return
+		}
+		http.Error(res, jsonStatusForbidden, http.StatusForbidden)
+	default:
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
 func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -144,4 +161,5 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.PathPrefix("/post").Handler(http.StripPrefix("/admin/api/post", http.HandlerFunc(a.postAPI)))
 	router.PathPrefix("/list").Handler(http.StripPrefix("/admin/api/list", http.HandlerFunc(a.listAPI)))
 	router.PathPrefix("/blob").Handler(http.StripPrefix("/admin/api/blob", http.HandlerFunc(a.blobAPI)))
+	router.HandleFunc("/whoami", a.whoamiAPI)
 }

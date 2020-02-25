@@ -25,14 +25,14 @@ func validatePassword(password, hash, salt string) bool {
 }
 
 type user struct {
-	id       string
-	username string
+	ID       string `json:"id"`
+	Username string `json:"username"`
 	hash     string
 	salt     string
 }
 
 func newUser(id, username, password string) (*user, error) {
-	u := user{id: id, username: username}
+	u := user{ID: id, Username: username}
 	var err error
 	u.hash, u.salt, err = hashPassword(password)
 	if err != nil {
@@ -42,7 +42,7 @@ func newUser(id, username, password string) (*user, error) {
 }
 
 func (u user) validate(id, password string) bool {
-	return u.id == id && validatePassword(password, u.hash, u.salt)
+	return u.ID == id && validatePassword(password, u.hash, u.salt)
 }
 
 type userDB struct {
@@ -66,11 +66,11 @@ func (u userDB) getUser(id string) *user {
 func (u *userDB) setUser(user *user) {
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
-	u.db[user.id] = user
+	u.db[user.ID] = user
 }
 
 func (u *userDB) addUser(user *user) error {
-	if u.getUser(user.id) == nil {
+	if u.getUser(user.ID) == nil {
 		u.setUser(user)
 		return nil
 	}
