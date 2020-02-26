@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type contextKey string
@@ -54,27 +56,33 @@ func newSignInHandler(signInURL, assetsURL, apiURL string, sessionDB *sessionDB,
 	}
 }
 
-func (s signInHandler) middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+func (s signInHandler) middleware(blocking bool) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 
-		if req.URL.Path == s.signInURL || strings.HasPrefix(req.URL.Path, s.assetsURL) {
-			next.ServeHTTP(res, req)
-			return
-		}
+			if req.URL.Path == s.signInURL || strings.HasPrefix(req.URL.Path, s.assetsURL) {
+				next.ServeHTTP(res, req)
+				return
+			}
 
-		if ok, user := s.sessionDB.validate(mustReadCookie("sess", req), readIP(req)); ok {
-			req = req.WithContext(context.WithValue(req.Context(), contextKeyUser, user))
-			next.ServeHTTP(res, req)
-			return
-		}
+			if ok, user := s.sessionDB.validate(mustReadCookie("sess", req), readIP(req)); ok {
+				req = req.WithContext(context.WithValue(req.Context(), contextKeyUser, user))
+				next.ServeHTTP(res, req)
+				return
+			}
 
-		if strings.HasPrefix(req.URL.Path, s.apiURL) {
-			http.Error(res, jsonStatusForbidden, http.StatusForbidden)
-			return
-		}
+			if strings.HasPrefix(req.URL.Path, s.apiURL) {
+				http.Error(res, jsonStatusForbidden, http.StatusForbidden)
+				return
+			}
 
-		http.Redirect(res, req, s.signInURL+"?redirect="+req.URL.EscapedPath(), http.StatusFound)
-	})
+			if blocking {
+				http.Redirect(res, req, s.signInURL+"?redirect="+req.URL.EscapedPath(), http.StatusFound)
+			} else {
+				next.ServeHTTP(res, req)
+			}
+		})
+	}
 }
 
 func (s signInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
