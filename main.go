@@ -17,6 +17,11 @@ func main() {
 
 	fmt.Println(cfg)
 
+	db, err := bolt.Open(cfg.BoltPath, os.FileMode(0644), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	t, err := template.New("html").ParseGlob("./html/*.html")
 	if err != nil {
 		log.Fatal(err)
@@ -29,7 +34,7 @@ func main() {
 		"/admin/assets/",
 		"/admin/api/",
 		newSessionDB(true, 10*time.Minute),
-		newUserDB(),
+		newUserDB(db),
 		t)
 
 	rAdmin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)

@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"sync"
+	"log"
+
+	"github.com/boltdb/bolt"
 
 	"golang.org/x/crypto/scrypt"
 )
@@ -27,14 +30,14 @@ func validatePassword(password, hash, salt string) bool {
 type user struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
-	hash     string
-	salt     string
+	Hash     string `json:"hash"`
+	Salt     string `json:"salt"`
 }
 
 func newUser(id, username, password string) (*user, error) {
 	u := user{ID: id, Username: username}
 	var err error
-	u.hash, u.salt, err = hashPassword(password)
+	u.Hash, u.Salt, err = hashPassword(password)
 	if err != nil {
 		return nil, err
 	}
@@ -42,31 +45,54 @@ func newUser(id, username, password string) (*user, error) {
 }
 
 func (u user) validate(id, password string) bool {
-	return u.ID == id && validatePassword(password, u.hash, u.salt)
+	return u.ID == id && validatePassword(password, u.Hash, u.Salt)
 }
 
 type userDB struct {
-	db    map[string]*user
-	mutex *sync.Mutex
+	db *bolt.DB
 }
 
-func newUserDB() *userDB {
+func newUserDB(db *bolt.DB) *userDB {
 	return &userDB{
-		db:    make(map[string]*user),
-		mutex: new(sync.Mutex),
+		db: db,
 	}
 }
 
 func (u userDB) getUser(id string) *user {
-	u.mutex.Lock()
-	defer u.mutex.Unlock()
-	return u.db[id]
+	var uptr *user
+	err := u.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket([]byte("users"))
+		if c == nil {
+			return nil
+		}
+		uptr = new(user)
+		if userData := c.Get([]byte(id)); userData != nil {
+			return json.Unmarshal(userData, uptr)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return uptr
 }
 
 func (u *userDB) setUser(user *user) {
-	u.mutex.Lock()
-	defer u.mutex.Unlock()
-	u.db[user.ID] = user
+	err := u.db.Update(func(tx *bolt.Tx) error {
+		c, err := tx.CreateBucketIfNotExists([]byte("users"))
+		if err != nil {
+			return err
+		}
+		u, err := json.Marshal(user)
+		if err != nil {
+			return err
+		}
+		return c.Put([]byte(user.ID), u)
+	})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (u *userDB) addUser(user *user) error {
@@ -78,7 +104,14 @@ func (u *userDB) addUser(user *user) error {
 }
 
 func (u userDB) size() int {
-	u.mutex.Lock()
-	defer u.mutex.Unlock()
-	return len(u.db)
+	result := 0
+	_ = u.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("users"))
+		if b == nil {
+			return nil
+		}
+		result = b.Stats().KeyN
+		return nil
+	})
+	return result
 }
