@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 
 type adminAPI struct {
 	conf *config
+	hugo *hugo
 }
 
 func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
@@ -137,7 +139,14 @@ func (a adminAPI) whoamiAPI(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
 		if u, ok := req.Context().Value(contextKeyUser).(*user); ok {
-			err := json.NewEncoder(res).Encode(u)
+			err := json.NewEncoder(res).Encode(
+				struct {
+					ID       string `json:"id"`
+					Username string `json:"username"`
+				}{
+					ID:       u.ID,
+					Username: u.Username,
+				})
 			if err != nil {
 				log.Println(err)
 				http.Error(res, jsonStatusForbidden, http.StatusForbidden)
@@ -145,6 +154,23 @@ func (a adminAPI) whoamiAPI(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		http.Error(res, jsonStatusForbidden, http.StatusForbidden)
+	default:
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a adminAPI) buildAPI(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "POST":
+		r := a.hugo.build()
+		if r.err != nil {
+			log.Println(r.err)
+		}
+		fmt.Println(r.Result)
+		err := json.NewEncoder(res).Encode(r)
+		if err != nil {
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
 	default:
 		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
@@ -162,4 +188,5 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.PathPrefix("/list").Handler(http.StripPrefix("/admin/api/list", http.HandlerFunc(a.listAPI)))
 	router.PathPrefix("/blob").Handler(http.StripPrefix("/admin/api/blob", http.HandlerFunc(a.blobAPI)))
 	router.HandleFunc("/whoami", a.whoamiAPI)
+	router.HandleFunc("/build", a.buildAPI)
 }

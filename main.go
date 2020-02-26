@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/boltdb/bolt"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -27,6 +29,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	hg := newHugo(cfg)
+
 	r := mux.NewRouter().StrictSlash(true)
 
 	signin := newSignInHandler(
@@ -41,7 +45,7 @@ func main() {
 
 	admin{signIn: signin, t: t}.setupHandlers(rAdmin)
 
-	adminAPI{conf: cfg}.setupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
+	adminAPI{conf: cfg, hugo: hg}.setupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir(cfg.PublicPath)))
 

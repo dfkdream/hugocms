@@ -14,7 +14,7 @@ type admin struct {
 }
 
 func (a admin) setupHandlers(router *mux.Router) {
-	router.Use(a.signIn.middleware)
+	router.Use(a.signIn.middleware(true))
 
 	router.PathPrefix("/assets").Handler(
 		http.StripPrefix("/admin/assets/", http.FileServer(http.Dir("./assets"))))
