@@ -25,11 +25,27 @@ func (a admin) setupHandlers(router *mux.Router) {
 		http.Redirect(res, req, "/admin/list/", http.StatusFound)
 	})
 
-	router.HandleFunc("/list/", func(res http.ResponseWriter, req *http.Request) {
+	router.PathPrefix("/list/").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		err := a.t.ExecuteTemplate(res, "list.html", nil)
 		if err != nil {
 			log.Println(err)
-			http.Redirect(res, req, "/admin/list/", http.StatusFound)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		}
+	})
+
+	router.PathPrefix("/edit").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		err := a.t.ExecuteTemplate(res, "edit.html", nil)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		}
+	})
+
+	router.HandleFunc("/config", func(res http.ResponseWriter, req *http.Request) {
+		err := a.t.ExecuteTemplate(res, "config.html", nil)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		}
 	})
 }
