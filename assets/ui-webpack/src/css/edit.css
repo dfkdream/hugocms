@@ -1,0 +1,30 @@
+.editor-container{
+    margin: 0 auto;
+    padding: 1em;
+    max-width: 1600px;
+}
+
+.form-info{
+    max-width: 700px;
+}
+
+.location-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-bottom: .4rem;
+}
+
+.location-header h1{
+    margin: 0;
+}
+
+.location-header i{
+    margin-right: 5px;
+}
+
+div.tui-colorpicker-clearfix{
+    box-sizing: content-box;
+    line-height: normal;
+}

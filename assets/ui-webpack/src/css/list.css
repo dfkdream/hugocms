@@ -1,0 +1,33 @@
+.list-container{
+    margin: 0 auto;
+    padding: 1em;
+    max-width: 1600px;
+}
+
+.location-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-bottom: .4rem;
+}
+
+.location-header h1{
+    margin: 0;
+}
+
+.location-header i{
+    margin-right: 5px;
+}
+
+td i{
+    width: 2rem;
+    text-align: center;
+}
+
+.console{
+    background-color: #3b4351;
+    color: white;
+    padding: 1em;
+    border-radius: 3px;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<link>
+    <meta charset="UTF-8">
+    <title>HugoCMS Editor</title>
+    <link rel="stylesheet" href="/admin/assets/edit.bundle.css"/>
+</head>
+<body>
+    {{ template "navbar" }}
+    <div class="editor-container">
+        <div class="location-header">
+            <h1 id="location">Loading...</h1>
+            <div>
+                <a class="btn btn-primary" id="raw" href="#" target="_blank"><i class="fas fa-file-alt"></i>Raw</a>
+                <button class="btn btn-primary" id="save"><i class="fas fa-save"></i>Save</button>
+            </div>
+        </div>
+        <div class="form-horizontal form-info">
+            <div class="form-group">
+                <div class="col-3 col-sm-12">
+                    <label class="form-label" for="title">Title</label>
+                </div>
+                <div class="col-9 col-sm-12">
+                    <input class="form-input" type="text" id="title" placeholder="Title"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-3 col-sm-12">
+                    <label class="form-label" for="subtitle">Subtitle</label>
+                </div>
+                <div class="col-9 col-sm-12">
+                    <input class="form-input" type="text" id="subtitle" placeholder="Subtitle"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-3 col-sm-12">
+                    <label class="form-label" for="date">Publish Date</label>
+                </div>
+                <div class="col-9 col-sm-12">
+                    <div class="input-group">
+                        <input class="form-input" type="date" id="date"/>
+                        <button class="btn btn-primary input-group-btn" id="date-now">Now</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-3 col-sm-12">
+                    <label class="form-label" for="author">Author</label>
+                </div>
+                <div class="col-9 col-sm-12">
+                    <input class="form-input" type="text" id="author" placeholder="Author"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-3 col-sm-12">
+                    <label class="form-label" for="attachments">Attachments</label>
+                </div>
+                <div class="input-group col-9 col-sm-12">
+                        <select class="form-select col-10" id="attachments"></select>
+                        <button class="btn btn-primary input-group-btn col-1" id="attachment-add"><i class="fas fa-plus"></i></button>
+                        <button class="btn btn-primary input-group-btn col-1" id="attachment-delete"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group col-3 col-sm-12">
+                    <div class="col-1">
+                        <input class="form-checkbox" type="checkbox" id="show-reading-time" checked>
+                    </div>
+                    <div class="col-11">
+                        <label class="form-label" for="show-reading-time">Show Reading Time</label>
+                    </div>
+                </div>
+                <div class="form-group col-3 col-sm-12">
+                    <div class="col-1">
+                        <input class="form-checkbox" type="checkbox" id="show-languages" checked>
+                    </div>
+                    <div class="col-11">
+                        <label class="form-label" for="show-languages">Show Languages</label>
+                    </div>
+                </div>
+                <div class="form-group col-3 col-sm-12">
+                    <div class="col-1">
+                        <input class="form-checkbox" type="checkbox" id="show-author" checked>
+                    </div>
+                    <div class="col-11">
+                        <label class="form-label" for="show-author">Show Author</label>
+                    </div>
+                </div>
+                <div class="form-group col-3 col-sm-12">
+                    <div class="col-1">
+                        <input class="form-checkbox" type="checkbox" id="show-date" checked>
+                    </div>
+                    <div class="col-11">
+                        <label class="form-label" for="show-date">Show Date</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="editor"></div>
+    </div>
+
+    <script src="/admin/assets/edit.bundle.js"></script>
+</body>
+</html>
