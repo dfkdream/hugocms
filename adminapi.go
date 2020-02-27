@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,7 +29,7 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, jsonStatusNotFound, http.StatusNotFound)
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		a, err := parseArticle(f)
 		if err != nil {
 			log.Println(err)
@@ -55,7 +56,7 @@ func (a adminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		jsonEnc := json.NewEncoder(f)
 		jsonEnc.SetIndent("", "    ")
 		err = jsonEnc.Encode(articleJSON.FrontMatter)
@@ -129,7 +130,7 @@ func (a adminAPI) blobAPI(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		res.Header().Del("Content-Type")
-		http.ServeFile(res, req, filepath.Clean("/"+req.URL.Path))
+		http.ServeFile(res, req, filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
 	default:
 		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
@@ -176,6 +177,30 @@ func (a adminAPI) buildAPI(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (a adminAPI) configAPI(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		res.Header().Del("Content-Type")
+		http.ServeFile(res, req, a.conf.ConfigPath)
+	case "POST":
+		f, err := os.OpenFile(a.conf.ConfigPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(0644))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		defer func() { _ = f.Close() }()
+		_, err = io.Copy(f, req.Body)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+	default:
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
 func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -189,4 +214,5 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.PathPrefix("/blob").Handler(http.StripPrefix("/admin/api/blob", http.HandlerFunc(a.blobAPI)))
 	router.HandleFunc("/whoami", a.whoamiAPI)
 	router.HandleFunc("/build", a.buildAPI)
+	router.HandleFunc("/config", a.configAPI)
 }
