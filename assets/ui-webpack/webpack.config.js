@@ -7,9 +7,7 @@ const TerserJSPlugin = require('terser-webpack-plugin');
 module.exports = {
 	optimization: {
 		minimizer: [
-			new TerserJSPlugin({
-				extractComments: false
-			}),
+			new TerserJSPlugin({}),
 			new OptimizeCSSAssetsPlugin({})
 		]
 	},
