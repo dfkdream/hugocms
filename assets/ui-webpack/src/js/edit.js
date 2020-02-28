@@ -34,6 +34,28 @@ const editor = new Editor({
     usageStatistics: false
 });
 
+class optionsList{
+    constructor(target){
+        this.target = target;
+        this.list = [];
+    }
+
+    append(value){
+        this.list.push(value);
+        let op = document.createElement("option");
+        op.text = value;
+        this.target.add(op);
+    }
+
+    delete(idx){
+        this.list.splice(idx,1)
+    }
+
+    fromList(list){
+        list.forEach(i=>this.append(i));
+    }
+}
+
 const path = location.pathname.replace(/^(\/admin\/edit)/,"");
 const endpoint = filepath.join("/admin/api/post", path);
 
@@ -43,6 +65,7 @@ const title = document.getElementById("title");
 const subtitle = document.getElementById("subtitle");
 const date = document.getElementById("date");
 const author = document.getElementById("author");
+const attachments = new optionsList(document.getElementById("attachments"));
 const showReadingTime = document.getElementById("show-reading-time");
 const showLanguages = document.getElementById("show-languages");
 const showAuthor = document.getElementById("show-author");
@@ -66,7 +89,7 @@ document.getElementById("save").onclick=()=>{
                 subtitle: subtitle.value,
                 date: date.valueAsDate,
                 author: author.value,
-                attachments: [],
+                attachments: attachments.list,
                 showReadingTime: showReadingTime.checked,
                 showLanguages: showLanguages.checked,
                 showAuthor: showAuthor.checked,
@@ -84,9 +107,10 @@ fetch(endpoint)
         subtitle.value = data.frontMatter.subtitle;
         date.valueAsDate = new Date(data.frontMatter.date);
         author.value = data.frontMatter.author;
+        attachments.fromList(data.frontMatter.attachments);
         showReadingTime.checked=data.frontMatter.showReadingTime;
         showLanguages.checked=data.frontMatter.showLanguages;
         showAuthor.checked=data.frontMatter.showAuthor;
         showDate.checked=data.frontMatter.showDate;
         editor.setMarkdown(data.body);
-    })
+    });
