@@ -32,8 +32,9 @@
             </tbody>
         </table>
     </div>
+
     <div class="modal" id="rebuild-modal">
-        <div class="modal-overlay" aria-label="Close"></div>
+        <div class="modal-overlay"></div>
         <div class="modal-container">
             <div class="modal-header">
                 <div class="modal-title h5" id="rebuild-modal-title">Rebuilding...</div>
@@ -44,6 +45,23 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-link" id="rebuild-modal-close" disabled>Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="upload-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title h5" id="upload-modal-title">Upload File</div>
+            </div>
+            <div class="modal-body">
+                <div class="content" id="upload-modal-content">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-link" id="upload-modal-close">Cancel</button>
+                <button class="btn btn-primary" id="upload-modal-upload" disabled>Upload</button>
             </div>
         </div>
     </div>
