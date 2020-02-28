@@ -22,6 +22,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
     "file-loader": "^5.1.0",
+    "html-loader": "^0.5.5",
     "spectre.css": "^0.5.8",
     "tui-color-picker": "^2.2.6",
     "tui-editor": "^1.4.10"

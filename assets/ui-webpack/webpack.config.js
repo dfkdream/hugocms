@@ -38,6 +38,15 @@ module.exports = {
 			},{
 				test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
 				loader: "file-loader"
+			},{
+				test:/\.html$/,
+				include: [
+					path.resolve(__dirname,"src/html")
+				],
+				loader: "html-loader",
+				options: {
+					minimize: true
+				}
 			}
 		]
 	},
