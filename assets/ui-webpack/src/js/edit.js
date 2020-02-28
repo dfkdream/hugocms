@@ -50,11 +50,16 @@ class optionsList{
     }
 
     delete(idx){
-        this.list.splice(idx,1)
+        this.list.splice(idx,1);
+        this.target.remove(idx);
     }
 
     fromList(list){
         list.forEach(i=>this.append(i));
+    }
+
+    selectedIndex(){
+        return this.target.selectedIndex;
     }
 }
 
