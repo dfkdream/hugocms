@@ -25,6 +25,8 @@ const Editor = require('tui-editor');
 
 const filepath = require('./filepath');
 
+const popup = require('./popup');
+
 const editor = new Editor({
     el: document.getElementById("editor"),
     initialEditType: 'markdown',
@@ -97,7 +99,16 @@ document.getElementById("save").onclick=()=>{
             },
             body: editor.getMarkdown()
         })})
-        .then(()=>alert("Saved."));
+        .then((resp)=>{
+            if (resp.ok){
+                popup.alert(document.body,"Save","Saved.");
+            }else{
+                resp.json()
+                    .then(err=>{
+                        popup.alert(document.body,"Save Error",`${err.code} ${err.message}`);
+                    })
+            }
+        });
 };
 
 fetch(endpoint)
