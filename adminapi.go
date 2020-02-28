@@ -117,6 +117,24 @@ func (a adminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 	case "PUT":
+		var path string
+		err := json.NewDecoder(req.Body).Decode(&path)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusBadRequest, http.StatusBadRequest)
+			return
+		}
+		err = os.Rename(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)), filepath.Join(a.conf.ContentPath, filepath.Clean(path)))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	case "DELETE":
+		err := os.RemoveAll(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
 	default:
 		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
@@ -131,6 +149,39 @@ func (a adminAPI) blobAPI(res http.ResponseWriter, req *http.Request) {
 		}
 		res.Header().Del("Content-Type")
 		http.ServeFile(res, req, filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
+	case "POST":
+		f, err := os.OpenFile(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, os.FileMode(0644))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		defer func() { _ = f.Close() }()
+
+		_, err = io.Copy(f, req.Body)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	case "PUT":
+		var path string
+		err := json.NewDecoder(req.Body).Decode(&path)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusBadRequest, http.StatusBadRequest)
+			return
+		}
+		err = os.Rename(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)), filepath.Join(a.conf.ContentPath, filepath.Clean(path)))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	case "DELETE":
+		err := os.Remove(filepath.Join(a.conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
 	default:
 		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
