@@ -28,3 +28,7 @@ div.tui-colorpicker-clearfix{
     box-sizing: content-box;
     line-height: normal;
 }
+
+.attachment-modal-container{
+    max-width: 60em !important;
+}

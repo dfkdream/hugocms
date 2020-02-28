@@ -27,6 +27,10 @@ const filepath = require('./filepath');
 
 const popup = require('./popup');
 
+const fileList = require('./filelist');
+
+const fpath = require('path');
+
 const editor = new Editor({
     el: document.getElementById("editor"),
     initialEditType: 'markdown',
@@ -78,8 +82,35 @@ const showLanguages = document.getElementById("show-languages");
 const showAuthor = document.getElementById("show-author");
 const showDate = document.getElementById("show-date");
 
+const attachmentModal = document.getElementById("attachment-modal");
+const attachmentModalPath = document.getElementById("attachment-modal-path");
+
+const uploadModal = document.getElementById("upload-modal");
+const uploadModalTitle = document.getElementById("upload-modal-title");
+const uploadModalContent = document.getElementById("upload-modal-content");
+const uploadModalUpload = document.getElementById("upload-modal-upload");
+const uploadModalClose = document.getElementById("upload-modal-close");
+
 document.getElementById("date-now").onclick=()=>{
     date.valueAsDate = new Date();
+};
+
+document.getElementById("attachment-add").onclick = ()=>{
+    attachmentModal.setAttribute("class","modal active");
+};
+
+document.getElementById("attachment-modal-close").onclick = ()=>{
+    attachmentModal.setAttribute("class","modal");
+};
+
+document.getElementById("attachment-modal-overlay").onclick = ()=>{
+    attachmentModal.setAttribute("class","modal");
+};
+
+document.getElementById("attachment-delete").onclick = ()=>{
+    if (attachments.list.length>0){
+        attachments.delete(attachments.selectedIndex());
+    }
 };
 
 document.getElementById("raw").setAttribute("href",filepath.join("/admin/api/blob", path));
@@ -130,3 +161,101 @@ fetch(endpoint)
         showDate.checked=data.frontMatter.showDate;
         editor.setMarkdown(data.body);
     });
+
+
+const f = new fileList({
+    path: filepath.clean(filepath.join(path,"..")),
+    target: document.getElementById("attachment-modal-list"),
+    onclickCallback: (file)=>{
+        if (file.isDir){
+            f.navigate(filepath.join(f.path,file.name));
+            attachmentModalPath.innerText = f.path;
+        }else{
+            switch(filepath.ext(file.name)){
+                case "md": case "html":
+                    popup.alert(document.body,"Error","Markdown or HTML files cannot be attached");
+                    break;
+                default:
+                    attachments.append(
+                        fpath.relative(
+                            (/^index.(md|html|html)$/).test(fpath.basename(path))?fpath.dirname(path):path,
+                            fpath.join(f.path,file.name)));
+                    attachmentModal.setAttribute("class","modal");
+            }
+        }
+    },
+    actions: [
+        {
+            icon: "fas fa-trash-alt",
+            tooltip: "Delete",
+            callback:file=>{
+                popup.confirm(document.body,"Confirm Delete", `Delete ${file.name}?`)
+                    .then(confirm=>{
+                        if (confirm){
+                            if (file.isDir){
+                                fetch(filepath.join("/admin/api/list/",filepath.join(f.path,file.name)),{
+                                    method: "DELETE",
+                                })
+                                    .then(res=>{
+                                        if (!res.ok){
+                                            alert("Error delete directory");
+                                        }
+                                        f.reload();
+                                    })
+                            }else{
+                                fetch(filepath.join("/admin/api/blob/",filepath.join(f.path,file.name)),{
+                                    method: "DELETE",
+                                })
+                                    .then(res=>{
+                                        if (!res.ok){
+                                            alert("Error rename file");
+                                        }
+                                        f.reload();
+                                    })
+                            }
+                        }
+                    });
+            }
+        }, {
+            icon: "fas fa-edit",
+            tooltip: "Rename",
+            callback:file=>{
+                popup.prompt(document.body,"Rename",`Rename ${file.name} to`)
+                    .then(fn=>{
+                        if (fn){
+                            if (file.isDir){
+                                fetch(filepath.join("/admin/api/list/",filepath.join(f.path,file.name)),{
+                                    method: "PUT",
+                                    body: JSON.stringify(filepath.join(f.path,fn))
+                                })
+                                    .then(res=>{
+                                        if (!res.ok){
+                                            alert("Error rename directory");
+                                        }
+                                        f.reload();
+                                    })
+                            }else{
+                                fetch(filepath.join("/admin/api/blob/",filepath.join(f.path,file.name)),{
+                                    method: "PUT",
+                                    body: JSON.stringify(filepath.join(f.path,fn))
+                                })
+                                    .then(res=>{
+                                        if (!res.ok){
+                                            alert("Error rename file");
+                                        }
+                                        f.reload();
+                                    })
+                            }
+                        }
+
+                    });
+            }
+        }]
+});
+
+document.getElementById("upload-file").onclick = ()=>{
+    popup.upload(document.body,filepath.join("/admin/api/blob",f.path))
+        .then(()=>f.reload());
+};
+
+attachmentModalPath.innerText = f.path;
