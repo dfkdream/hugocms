@@ -29,34 +29,12 @@ function fileToEndpoint(file){
    }
 }
 
-async function uploadFiles(path,files,callback){
-    for (let i=0;i<files.length;i++) {
-        let file = files[i];
-        callback(i+1,files.length,file.name);
-        let resp = await fetch(filepath.join(filepath.join("/admin/api/blob", path), filepath.clean("/" + file.name)), {
-            method: "POST",
-            body: file
-        });
-
-        if (!resp.ok) {
-            let data = await resp.json();
-            alert(`Upload error: ${file.name} ${data.code} ${data.message}`);
-        }
-    }
-}
-
 const path = location.pathname.replace(/^(\/admin\/list)/,"");
 
 const rebuildModal = document.getElementById("rebuild-modal");
 const rebuildModalTitle = document.getElementById("rebuild-modal-title");
 const rebuildModalResult = document.getElementById("rebuild-modal-result");
 const rebuildModalClose = document.getElementById("rebuild-modal-close");
-
-const uploadModal = document.getElementById("upload-modal");
-const uploadModalTitle = document.getElementById("upload-modal-title");
-const uploadModalContent = document.getElementById("upload-modal-content");
-const uploadModalUpload = document.getElementById("upload-modal-upload");
-const uploadModalClose = document.getElementById("upload-modal-close");
 
 const locationHeader = document.getElementById("location");
 locationHeader.innerText=path;
@@ -140,9 +118,8 @@ const f = new fileList({
 
                     });
             }
-        }
-    ]
-});
+        }]
+    });
 
 document.getElementById("new-directory").onclick=()=>{
     popup.prompt(document.body,"Create Directory","Enter directory name")
@@ -185,48 +162,8 @@ rebuildModalClose.onclick = ()=>{
 };
 
 document.getElementById("upload-file").onclick=()=>{
-    uploadModalUpload.setAttribute("disabled","");
-    uploadModalClose.removeAttribute("disabled");
-    uploadModalTitle.innerText = "Upload File";
-    uploadModalContent.innerHTML="";
-    let inputFile = document.createElement("input");
-    inputFile.setAttribute("type","file");
-    inputFile.setAttribute("class","form-input");
-    inputFile.setAttribute("multiple","");
-    uploadModalContent.appendChild(inputFile);
-    uploadModal.setAttribute("class","modal active");
-
-    inputFile.onchange = ()=>{
-        uploadModalUpload.removeAttribute("disabled");
-    };
-
-    uploadModalUpload.onclick = ()=>{
-        uploadModalTitle.innerText = "Uploading...";
-        uploadModalContent.innerHTML="";
-        uploadModalClose.setAttribute("disabled","");
-        uploadModalUpload.setAttribute("disabled","");
-        let statusProgress = document.createElement("progress");
-        statusProgress.setAttribute("class","progress");
-        statusProgress.setAttribute("max","100");
-        uploadModalContent.appendChild(statusProgress);
-
-        let statusP = document.createElement("p");
-        uploadModalContent.appendChild(statusP);
-
-        uploadFiles(f.path,inputFile.files,(idx,len,name)=>{
-            statusProgress.value = idx/len*100;
-            statusP.innerText = `(${idx}/${len}) ${name}`;
-            statusP.style.margin=".8rem 0 0";
-        })
-            .then(()=>{
-                uploadModal.setAttribute("class","modal");
-                f.reload();
-            });
-    };
-};
-
-uploadModalClose.onclick = ()=>{
-    uploadModal.setAttribute("class","modal");
+    popup.upload(document.body,filepath.join("/admin/api/blob",f.path))
+        .then(()=>f.reload());
 };
 
 history.replaceState(f.path,"HugoCMS - "+f.path,filepath.join("/admin/list",f.path));
