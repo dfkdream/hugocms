@@ -16,9 +16,13 @@ FROM node AS webpack
 
 WORKDIR /webpack
 
-COPY ./assets/ui-webpack .
+COPY ./assets/ui-webpack/package.json .
+
+COPY ./assets/ui-webpack/package-lock.json .
 
 RUN npm install
+
+COPY ./assets/ui-webpack .
 
 RUN npx webpack --mode production
 
