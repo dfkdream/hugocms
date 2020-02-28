@@ -256,6 +256,7 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			res.Header().Set("Content-Type", "application/json")
+			res.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			next.ServeHTTP(res, req)
 		})
 	})
