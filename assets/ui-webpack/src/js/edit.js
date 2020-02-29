@@ -85,12 +85,6 @@ const showDate = document.getElementById("show-date");
 const attachmentModal = document.getElementById("attachment-modal");
 const attachmentModalPath = document.getElementById("attachment-modal-path");
 
-const uploadModal = document.getElementById("upload-modal");
-const uploadModalTitle = document.getElementById("upload-modal-title");
-const uploadModalContent = document.getElementById("upload-modal-content");
-const uploadModalUpload = document.getElementById("upload-modal-upload");
-const uploadModalClose = document.getElementById("upload-modal-close");
-
 document.getElementById("date-now").onclick=()=>{
     date.valueAsDate = new Date();
 };
@@ -178,7 +172,7 @@ const f = new fileList({
                 default:
                     attachments.append(
                         fpath.relative(
-                            (/^index.(md|html|html)$/).test(fpath.basename(path))?fpath.dirname(path):path,
+                            /^_?index(\..+)?\.(md|html|htm)$/i.test(fpath.basename(path))?fpath.dirname(path):path,
                             fpath.join(f.path,file.name)));
                     attachmentModal.setAttribute("class","modal");
             }
