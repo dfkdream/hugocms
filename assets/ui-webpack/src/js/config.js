@@ -18,9 +18,26 @@ let editor = ace.edit(configCode,{
 });
 
 fetch("/admin/api/config")
-    .then(res=>res.text())
+    .then((res)=>{
+        if (!res.ok) return Promise.reject(res.json());
+        return res.text()
+    })
     .then(text=>editor.setValue(text, -1))
-    .catch(err=>console.log(err));
+    .catch(err=>{
+        if (err instanceof Promise) {
+            err.then(json => {
+                if (json.code === 403) popup.alert(document.body, "Session Expired", "Please sign in again").then(() => location.reload());
+                else popup.alert(document.body, "Error", `${json.code} ${json.message}`);
+            })
+                .catch(err => {
+                    console.log(err);
+                    popup.alert(document.body, "Error", "Unknown error occurred. Please reload.");
+                });
+        }else{
+            console.log(err);
+            popup.alert(document.body, "Error", "Unknown error occurred. Please reload.");
+        }
+    });
 
 document.getElementById("save").onclick=()=>{
     fetch("/admin/api/config",{
@@ -28,13 +45,16 @@ document.getElementById("save").onclick=()=>{
         body: editor.getValue()
     })
         .then(res=>{
-            if (!res.ok) {
-                res.json()
-                    .then(data => popup.alert(document.body,"Config Upload",`Upload Failed: ${data.code} ${data.message}`))
-                    .catch(() => popup.alert(document.body,"Config Upload","Upload Failed"));
-                return;
-            }
+            if (!res.ok) return Promise.reject(res.json());
             popup.alert(document.body,"Config Upload","Upload Succeed");
         })
-        .catch(()=>popup.alert(document.body,"Config Upload","Upload Failed"));
+        .catch((err)=>{
+            err.then(json=>{
+                popup.alert(document.body,"Config Upload",`Upload Failed: ${json.code} ${json.message}`);
+            })
+                .catch(err=>{
+                    console.log(err);
+                    popup.alert(document.body,"Config Upload","Upload Failed")
+                });
+        });
 };

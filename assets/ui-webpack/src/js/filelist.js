@@ -6,6 +6,7 @@
  * Released under MIT License
  */
 const filepath = require('./filepath');
+const popup = require('./popup');
 
 require('../css/filelist.css');
 
@@ -51,12 +52,11 @@ module.exports = class fileList{
 
     build(){
         fetch(filepath.join(this.endpoint,this.path))
-            .then(resp=>resp.json())
+            .then(resp=>{
+                if (!resp.ok) return Promise.reject(resp.json);
+                return resp.json();
+            })
             .then(data=>{
-                if (data.code) {
-                    alert(`${data.code} ${data.message}`);
-                    return
-                }
                 if (this.path!=="/"){
                     data=[{name:"..", isDir:true}].concat(data);
                 }
@@ -98,6 +98,18 @@ module.exports = class fileList{
 
                 this.target.innerHTML="";
                 this.target.appendChild(fragment);
+            })
+            .catch(err=>{
+                if (err instanceof Promise) {
+                    err.then(json => {
+                        if (json.code === 404) location.href = "/admin/list/";
+                        else popup.alert(document.body, "Error", `${json.code} ${json.message}`);
+                    })
+                        .catch(() => popup.alert(document.body, "Error", "Unknown error occurred. Please reload."));
+                }else{
+                    console.log(err);
+                    popup.alert(document.body, "Error", "Unknown error occurred. Please reload.");
+                }
             });
     }
 };

@@ -130,19 +130,29 @@ document.getElementById("save").onclick=()=>{
             body: editor.getMarkdown()
         })})
         .then((resp)=>{
-            if (resp.ok){
-                popup.alert(document.body,"Save","Saved.");
-            }else{
-                resp.json()
-                    .then(err=>{
-                        popup.alert(document.body,"Save Error",`${err.code} ${err.message}`);
+            if (!resp.ok) return Promise.reject(resp.json());
+            popup.alert(document.body,"Save","Saved.");
+        })
+        .catch(err=>{
+            if (err instanceof Promise){
+                err.then(json=>{
+                    popup.alert(document.body,"Save Error",`${json.code} ${json.message}`);
+                })
+                    .catch(()=>{
+                        popup.alert(document.body,"Save Error","Unknown error occurred.");
                     })
+            }else{
+                console.log(err);
+                popup.alert(document.body,"Save Error","Unknown error occurred.");
             }
-        });
+        })
 };
 
 fetch(endpoint)
-    .then(resp=>resp.json())
+    .then(resp=>{
+        if (!resp.ok) return Promise.reject(resp.json());
+        return resp.json()
+    })
     .then(data=>{
         title.value = data.frontMatter.title;
         subtitle.value = data.frontMatter.subtitle;
@@ -154,6 +164,20 @@ fetch(endpoint)
         showAuthor.checked=data.frontMatter.showAuthor;
         showDate.checked=data.frontMatter.showDate;
         editor.setMarkdown(data.body);
+    })
+    .catch(err=>{
+        if (err instanceof Promise){
+            err.then(json=>{
+                if (json.code===404) return;
+                popup.alert(document.body,"Error",`${json.code} ${json.message}`);
+            })
+                .catch(()=>{
+                    popup.alert(document.body,"Error",`Unknown error occurred. Please reload.`);
+                });
+        }else{
+            console.log(err);
+            popup.alert(document.body,"Error",`Unknown error occurred. Please reload.`);
+        }
     });
 
 
