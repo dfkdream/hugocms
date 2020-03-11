@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HugoCMS Config</title>
-    <link rel="stylesheet" href="/admin/assets/css/style.css">
-    <link rel="stylesheet" href="/admin/assets/css/spectre.min.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui-editor/latest/tui-editor.css"></link>
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui-editor/latest/tui-editor-contents.css"></link>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/codemirror.css"></link>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css"></link>
+    <title>HugoCMS Config Editor</title>
+    <link rel="stylesheet" href="/admin/assets/config.bundle.css"/>
 </head>
 <body>
     {{ template "navbar" }}
-    <div id="editorSection"></div>
-
-    <script src="https://uicdn.toast.com/tui-editor/latest/tui-editor-Editor-full.js"></script>
-    <script src="/admin/assets/js/config.bundle.js"></script>
+    <div class="config-container">
+        <div class="location-header">
+            <h1 id="location">Hugo Configuration</h1>
+            <div>
+                <button class="btn btn-primary" id="save"><i class="fas fa-save"></i>Save</button>
+            </div>
+        </div>
+        <div id="config-code"></div>
+    </div>
+    <script src="/admin/assets/config.bundle.js"></script>
 </body>
 </html>
