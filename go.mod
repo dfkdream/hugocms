@@ -1,4 +1,4 @@
-module hugocms
+module github.com/dfkdream/hugocms
 
 go 1.13
 
