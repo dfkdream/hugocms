@@ -89,7 +89,7 @@ func (s signInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET": // Sign in page
 		redirect := req.URL.Query().Get("redirect")
-		if redirect == "" {
+		if redirect == "" || redirect == s.signInURL {
 			redirect = "/admin/"
 		}
 		err := s.template.ExecuteTemplate(res, "signin.html", redirect)

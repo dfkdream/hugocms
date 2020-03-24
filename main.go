@@ -34,7 +34,7 @@ func main() {
 	r := mux.NewRouter().StrictSlash(true)
 
 	signin := newSignInHandler(
-		"/admin/signin/",
+		"/admin/signin",
 		"/admin/assets/",
 		"/admin/api/",
 		newSessionDB(true, 10*time.Minute),
