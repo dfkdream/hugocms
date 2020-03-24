@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -14,10 +15,32 @@ const (
 	reservedAddr = "/live,/metadata"
 )
 
+type contextKey string
+
+var (
+	// ContextKeyUser is context key for user data
+	ContextKeyUser = contextKey("user")
+)
+
 var (
 	// ReservedAddrConflictError is returned when assigning address which conflicts with reserved addresses.
 	ReservedAddrConflictError = errors.New("address conflicts with reserved address")
 )
+
+// User contains user information
+type User struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}
+
+// String converts user to json string
+func (u User) String() string {
+	if res, err := json.Marshal(u); err == nil {
+		return string(res)
+	} else {
+		return ""
+	}
+}
 
 // Info contains information about plugin which will be displayed on HugoCMS dashboard.
 type Info struct {
@@ -105,5 +128,15 @@ func (p *Plugin) HandleAPI(path string, handler http.Handler) {
 
 // ServeHTTP dispatches the requests to plugin.
 func (p *Plugin) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	if h := req.Header.Get("X-HugoCMS-User"); h != "" {
+		u := new(User)
+		err := json.Unmarshal([]byte(h), &u)
+		if err != nil {
+			http.Error(res, "Bad Request", http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+		req = req.WithContext(context.WithValue(req.Context(), ContextKeyUser, u))
+	}
 	p.router.ServeHTTP(res, req)
 }
