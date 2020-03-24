@@ -19,7 +19,7 @@ func (a admin) setupHandlers(router *mux.Router) {
 	router.PathPrefix("/assets").Handler(
 		http.StripPrefix("/admin/assets/", http.FileServer(http.Dir("./assets"))))
 
-	router.Handle("/signin/", a.signIn)
+	router.Handle("/signin", a.signIn)
 
 	router.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/admin/list/", http.StatusFound)
