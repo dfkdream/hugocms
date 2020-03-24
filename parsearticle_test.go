@@ -1,33 +1,64 @@
 package main
 
 import (
-	"os"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
 
-func TestFrontMatter_String(t *testing.T) {
-	f := frontMatter{
+var (
+	dummyFront = `{
+    "title": "hello world",
+    "subtitle": "",
+    "date": "2019-12-03T00:00:00Z",
+    "author": "John Doe",
+    "attachments": [
+        "hello_world.jpg"
+    ],
+    "showReadingTime": true,
+    "showLanguages": true,
+    "showAuthor": true,
+    "showDate": true
+}`
+	dummyArticle = "hello world"
+	dummyFile    = dummyFront + "\n" + dummyArticle
+	f            = frontMatter{
 		Title:           "hello world",
 		Subtitle:        "",
-		Date:            time.Now(),
+		Date:            MustParseTime(time.Parse(time.RFC3339, "2019-12-03T00:00:00Z")),
 		Author:          "John Doe",
-		Attachments:     []string{"./hello.png", "./world.png"},
+		Attachments:     []string{"hello_world.jpg"},
 		ShowReadingTime: true,
 		ShowLanguages:   true,
 		ShowAuthor:      true,
 		ShowDate:        true,
 	}
-	t.Log("\n", f)
+)
+
+func MustParseTime(t time.Time, err error) time.Time {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+func TestFrontMatter_String(t *testing.T) {
+	if f.String() != dummyFront {
+		t.Error("string does not matches")
+	}
 }
 
 func TestParseArticle(t *testing.T) {
-	f, err := os.Open("./test/test.md")
+	a, err := parseArticle(strings.NewReader(dummyFile))
 	if err != nil {
-		t.Log(err)
-		t.FailNow()
+		t.Error(err)
 	}
-	a, err := parseArticle(f)
-	t.Log(a)
-	t.Log(err)
+	if !reflect.DeepEqual(f, a.FrontMatter) {
+		t.Error("frontMatter does not matches")
+	}
+
+	if a.Body != dummyArticle {
+		t.Error("article does not matches")
+	}
 }
