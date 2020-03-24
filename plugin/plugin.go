@@ -19,7 +19,7 @@ var (
 	ReservedAddrConflictError = errors.New("address conflicts with reserved address")
 )
 
-// Info contains information about Plugin which will be displayed on HugoCMS dashboard.
+// Info contains information about plugin which will be displayed on HugoCMS dashboard.
 type Info struct {
 	Name        string `json:"name"`
 	Author      string `json:"author"`
@@ -32,7 +32,8 @@ type adminEndpoint struct {
 	Endpoint string `json:"endpoint"`
 }
 
-type metadata struct {
+// Metadata contains metadata about plugin
+type Metadata struct {
 	Info              Info            `json:"info"`
 	AdminEndpoints    []adminEndpoint `json:"adminEndpoints"`
 	AdminAPIEndpoints []string        `json:"adminAPIEndpoints"`
@@ -42,14 +43,14 @@ type metadata struct {
 // Plugin is HugoCMS Plugin which implements http.Handler.
 type Plugin struct {
 	router   *mux.Router
-	metadata *metadata
+	metadata *Metadata
 }
 
 // New creates new plugin.
 func New(Info Info) *Plugin {
 	p := &Plugin{
 		router: mux.NewRouter().StrictSlash(true),
-		metadata: &metadata{
+		metadata: &Metadata{
 			Info:              Info,
 			AdminEndpoints:    make([]adminEndpoint, 0),
 			AdminAPIEndpoints: make([]string, 0),
