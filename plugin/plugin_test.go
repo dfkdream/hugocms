@@ -32,14 +32,14 @@ func TestPlugin_ServeHTTP(t *testing.T) {
 	s := httptest.NewServer(p)
 	defer s.Close()
 
-	var j metadata
+	var j Metadata
 	err := json.NewDecoder(get(s.URL + "/metadata")).Decode(&j)
 	if err != nil {
 		t.Error(j)
 		t.FailNow()
 	}
 
-	if !reflect.DeepEqual(j, metadata{
+	if !reflect.DeepEqual(j, Metadata{
 		Info:              p.metadata.Info,
 		AdminEndpoints:    []adminEndpoint{{"hello", "/hello"}},
 		AdminAPIEndpoints: []string{},
