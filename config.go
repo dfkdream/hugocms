@@ -51,15 +51,15 @@ func getConfig() *config {
 	if ps != "" {
 		for _, v := range strings.Split(ps, ",") {
 			pluginAddr := strings.TrimSpace(v)
-			if !strings.HasPrefix(pluginAddr, "http://") {
+			if !strings.HasPrefix(pluginAddr, "http") {
 				pluginAddr = singleJoiningSlash("http://", pluginAddr)
-				m, err := getPluginMetadata(pluginAddr)
-				if err != nil {
-					log.Fatal(err)
-				}
-				cfg.Plugins = append(cfg.Plugins, *m)
 			}
 
+			m, err := getPluginMetadata(pluginAddr)
+			if err != nil {
+				log.Fatal(err)
+			}
+			cfg.Plugins = append(cfg.Plugins, *m)
 		}
 	}
 
