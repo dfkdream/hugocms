@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	reservedAddr = "/live,/metadata"
+	reservedAddr          = "/live,/metadata"
+	reservedAdminAPIAddr  = "/post,/list,/blob,/whoami,/build,/config"
+	reservedAdminPageAddr = "/,/assets,/list,/edit,/config"
 )
 
 type contextKey string
@@ -99,7 +101,7 @@ func New(Info Info) *Plugin {
 // menuName will be displayed on navigation bar.
 // Handler should write HTML document.
 func (p *Plugin) HandleAdminPage(path, menuName string, handler http.Handler) {
-	if strings.Contains(reservedAddr, path) {
+	if strings.Contains(reservedAddr, path) || strings.Contains(reservedAdminPageAddr, path) {
 		panic(ReservedAddrConflictError)
 	}
 	p.metadata.AdminEndpoints = append(p.metadata.AdminEndpoints, adminEndpoint{Endpoint: path, MenuName: menuName})
@@ -109,7 +111,7 @@ func (p *Plugin) HandleAdminPage(path, menuName string, handler http.Handler) {
 // HandleAdminAPI handles admin only API handlers.
 // Non logged in requests will be rejected.
 func (p *Plugin) HandleAdminAPI(path string, handler http.Handler) {
-	if strings.Contains(reservedAddr, path) {
+	if strings.Contains(reservedAddr, path) || strings.Contains(reservedAdminAPIAddr, path) {
 		panic(ReservedAddrConflictError)
 	}
 	p.metadata.AdminAPIEndpoints = append(p.metadata.AdminAPIEndpoints, path)
