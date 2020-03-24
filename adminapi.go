@@ -7,14 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/dfkdream/hugocms/plugin"
 
 	"github.com/gorilla/mux"
 )
@@ -274,31 +270,7 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 
 	for _, v := range a.conf.Plugins {
 		for _, path := range v.Metadata.AdminAPIEndpoints {
-			router.Handle(path, &httputil.ReverseProxy{Director: func(req *http.Request) {
-				target, err := url.Parse(singleJoiningSlash(v.Addr, path))
-				if err != nil {
-					log.Fatal(err)
-				}
-				req.URL.Scheme = target.Scheme
-				req.URL.Host = target.Host
-				req.URL.Path = target.Path
-
-				if target.RawQuery == "" || req.URL.RawPath == "" {
-					req.URL.RawQuery = target.RawQuery + req.URL.RawQuery
-				} else {
-					req.URL.RawQuery = target.RawQuery + "&" + req.URL.RawQuery
-				}
-
-				if _, ok := req.Header["User-Agent"]; !ok {
-					req.Header.Set("User-Agent", "")
-				}
-
-				req.Header.Del("X-HugoCMS-User")
-
-				if u, ok := req.Context().Value(contextKeyUser).(*user); ok {
-					req.Header.Set("X-HugoCMS-User", plugin.User{ID: u.ID, Username: u.Username}.String())
-				}
-			}})
+			router.Handle(path, newAuthenticatedReverseProxy(v.Addr, path))
 		}
 	}
 }
