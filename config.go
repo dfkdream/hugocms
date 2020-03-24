@@ -60,13 +60,13 @@ func getConfig() *config {
 				pluginAddr = singleJoiningSlash("http://", pluginAddr)
 			}
 
+			if !checkPluginLive(pluginAddr) {
+				log.Fatalf("plugin %s: plugin does not response", pluginAddr)
+			}
+
 			m, err := getPluginMetadata(pluginAddr)
 			if err != nil {
 				log.Fatal(err)
-			}
-
-			if !checkPluginLive(pluginAddr) {
-				log.Fatalf("plugin %s: plugin does not response", pluginAddr)
 			}
 
 			cfg.Plugins = append(cfg.Plugins, pluginData{
