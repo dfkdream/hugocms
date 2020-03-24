@@ -47,6 +47,8 @@ func main() {
 
 	adminAPI{conf: cfg, hugo: hg}.setupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
+	pluginAPI{config: cfg, signIn: signin}.setupHandlers(r.PathPrefix("/api").Subrouter().StrictSlash(true))
+
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir(cfg.PublicPath)))
 
 	logged := handlers.LoggingHandler(os.Stdout, r)
