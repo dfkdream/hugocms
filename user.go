@@ -34,6 +34,14 @@ type user struct {
 	Salt     string `json:"salt"`
 }
 
+func (u user) String() string {
+	if res, err := json.Marshal(u); err == nil {
+		return string(res)
+	} else {
+		return ""
+	}
+}
+
 func newUser(id, username, password string) (*user, error) {
 	u := user{ID: id, Username: username}
 	var err error
