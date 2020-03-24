@@ -6,6 +6,8 @@ WORKDIR /hugocms
 
 COPY ./*.go ./
 
+COPY ./plugin/*.go ./plugin/
+
 COPY ./go.* ./
 
 RUN go get
