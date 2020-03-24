@@ -12,6 +12,11 @@ import (
 	"github.com/dfkdream/hugocms/plugin"
 )
 
+type pluginData struct {
+	Addr     string          `json:"addr"`
+	Metadata plugin.Metadata `json:"metadata"`
+}
+
 type config struct {
 	Dir         string
 	ConfigPath  string
@@ -22,7 +27,7 @@ type config struct {
 	TLS         bool
 	CertPath    string
 	KeyPath     string
-	Plugins     []plugin.Metadata
+	Plugins     []pluginData
 }
 
 func (c config) String() string {
@@ -41,7 +46,7 @@ func getConfig() *config {
 		TLS:      getEnvBoolOr("TLS", false),
 		CertPath: getEnvStringOr("CERT", "./cert.pem"),
 		KeyPath:  getEnvStringOr("KEY", "./key.pem"),
-		Plugins:  make([]plugin.Metadata, 0),
+		Plugins:  make([]pluginData, 0),
 	}
 	cfg.ConfigPath = getEnvStringOr("CONFIG", filepath.Join(cfg.Dir, "config.yaml"))
 	cfg.ContentPath = getEnvStringOr("CONTENT", filepath.Join(cfg.Dir, "/content"))
@@ -59,7 +64,15 @@ func getConfig() *config {
 			if err != nil {
 				log.Fatal(err)
 			}
-			cfg.Plugins = append(cfg.Plugins, *m)
+
+			if !checkPluginLive(pluginAddr) {
+				log.Fatalf("plugin %s: plugin does not response", pluginAddr)
+			}
+
+			cfg.Plugins = append(cfg.Plugins, pluginData{
+				Addr:     pluginAddr,
+				Metadata: *m,
+			})
 		}
 	}
 
@@ -105,4 +118,13 @@ func getPluginMetadata(pluginAddr string) (*plugin.Metadata, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func checkPluginLive(pluginAddr string) bool {
+	addr := singleJoiningSlash(pluginAddr, "live")
+	res, err := http.Get(addr)
+	if err != nil {
+		return false
+	}
+	return res.StatusCode == 200
 }
