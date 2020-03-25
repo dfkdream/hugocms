@@ -40,6 +40,7 @@ func TestPlugin_ServeHTTP(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(j, Metadata{
+		Identifier:     p.metadata.Identifier,
 		Info:           p.metadata.Info,
 		AdminMenuItems: []adminMenuItem{{"hello", "/hello"}},
 	}) {
