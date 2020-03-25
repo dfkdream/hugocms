@@ -1,16 +1,16 @@
 {{ define "navbar" }}
-<header class="navbar">
-    <section class="navbar-section">
-        <a href="/admin/" class="navbar-brand mr-2">HugoCMS</a>
-    </section>
-    <section class="navbar-section">
-        <a href="/admin/config" class="btn btn-link">Config</a>
-        <a href="/admin/list/" class="btn btn-link">List</a>
-        {{- range .Plugins }}
-            {{- range .Metadata.AdminEndpoints }}
-                <a href="{{ printf "/admin%s" .Endpoint }}" class="btn btn-link">{{ .MenuName }}</a>
+    <header class="navbar">
+        <section class="navbar-section">
+            <a href="/admin/" class="navbar-brand mr-2">HugoCMS</a>
+        </section>
+        <section class="navbar-section">
+            <a href="/admin/config" class="btn btn-link">Config</a>
+            <a href="/admin/list/" class="btn btn-link">List</a>
+            {{- range . }}
+                {{- range .Metadata.AdminEndpoints }}
+            <a href="{{ printf "/admin%s" .Endpoint }}" class="btn btn-link">{{ .MenuName }}</a>
+                {{- end }}
             {{- end }}
-        {{- end }}
-    </section>
-</header>
+        </section>
+    </header>
 {{ end }}
