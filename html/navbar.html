@@ -6,6 +6,7 @@
         <section class="navbar-section">
             <a href="/admin/config" class="btn btn-link">Config</a>
             <a href="/admin/list/" class="btn btn-link">List</a>
+            <a href="/admin/plugins" class="btn btn-link">Plugins</a>
             {{- range . }}
                 {{- range .Metadata.AdminEndpoints }}
             <a href="{{ printf "/admin%s" .Endpoint }}" class="btn btn-link">{{ .MenuName }}</a>

@@ -1,0 +1,17 @@
+.plugins-container{
+    margin: 0 auto;
+    padding: 1em;
+    max-width: 1400px;
+}
+
+.location-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-bottom: .4rem;
+}
+
+.location-header h1{
+    margin: 0;
+}
