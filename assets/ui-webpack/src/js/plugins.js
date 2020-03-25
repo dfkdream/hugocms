@@ -23,7 +23,7 @@ fetch("/admin/api/plugins")
         json.forEach(p => {
             let f = document.createDocumentFragment();
             let d=document.createElement("div");
-            d.setAttribute("class","column col-6 col-xs-12 card-container");
+            d.setAttribute("class","column col-6 col-md-12 card-container");
             d.innerHTML = require('../html/plugin-card.html');
             f.appendChild(d);
             f.getElementById("plugin-title").innerText = p.info.name+"@"+p.info.version;
