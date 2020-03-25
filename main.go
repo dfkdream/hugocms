@@ -43,7 +43,7 @@ func main() {
 
 	rAdmin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)
 
-	admin{signIn: signin, t: t}.setupHandlers(rAdmin)
+	admin{signIn: signin, t: t, config: cfg}.setupHandlers(rAdmin)
 
 	adminAPI{conf: cfg, hugo: hg}.setupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
