@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>HugoCMS Plugin - {{ .Title }}</title>
+    <link rel="stylesheet" href="/admin/assets/plugin.bundle.css"/>
+</head>
+<body>
+    {{ template "navbar" .Plugins }}
+    <div class="plugin-container">
+        {{ .Body }}
+    </div>
+</body>
+</html>
