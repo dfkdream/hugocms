@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/dfkdream/hugocms/plugin"
@@ -69,9 +70,9 @@ func (a admin) setupHandlers(router *mux.Router) {
 	})
 
 	for _, v := range a.config.Plugins {
-		for _, e := range v.Metadata.AdminEndpoints {
-			router.HandleFunc(e.Endpoint, func(res http.ResponseWriter, req *http.Request) {
-				r, err := http.NewRequest("GET", singleJoiningSlash(v.Addr, e.Endpoint), nil)
+		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
+			http.StripPrefix("/admin/"+v.Metadata.Identifier, http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+				r, err := http.NewRequest("GET", singleJoiningSlash(v.Addr, path.Join("/admin", req.URL.Path)), nil)
 				if err != nil {
 					log.Println(err)
 					http.Error(res, "Internal Server Error", http.StatusInternalServerError)
@@ -102,8 +103,7 @@ func (a admin) setupHandlers(router *mux.Router) {
 					http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 					return
 				}
-			})
-		}
+			})))
 	}
 
 }

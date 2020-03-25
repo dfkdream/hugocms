@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dfkdream/hugocms/plugin"
+
 	"github.com/gorilla/mux"
 )
 
@@ -252,6 +254,28 @@ func (a adminAPI) configAPI(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+type pluginInfo struct {
+	Info   plugin.Info `json:"info"`
+	IsLive bool        `json:"isLive"`
+}
+
+func (a adminAPI) pluginsAPI(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		i := make([]pluginInfo, len(a.conf.Plugins))
+		for idx, v := range a.conf.Plugins {
+			i[idx] = pluginInfo{v.Metadata.Info, checkPluginLive(v.Addr)}
+		}
+		err := json.NewEncoder(res).Encode(i)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, jsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	default:
+		http.Error(res, jsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
 func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -267,10 +291,11 @@ func (a adminAPI) setupHandlers(router *mux.Router) {
 	router.HandleFunc("/whoami", a.whoamiAPI)
 	router.HandleFunc("/build", a.buildAPI)
 	router.HandleFunc("/config", a.configAPI)
+	router.HandleFunc("/plugins", a.pluginsAPI)
 
 	for _, v := range a.conf.Plugins {
-		for _, path := range v.Metadata.AdminAPIEndpoints {
-			router.Handle(path, newAuthenticatedReverseProxy(v.Addr, path))
-		}
+		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
+			http.StripPrefix("/admin/api/"+v.Metadata.Identifier,
+				newAuthenticatedReverseProxy(singleJoiningSlash(v.Addr, "/admin_api"))))
 	}
 }

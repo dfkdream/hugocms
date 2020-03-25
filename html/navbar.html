@@ -8,8 +8,9 @@
             <a href="/admin/list/" class="btn btn-link">List</a>
             <a href="/admin/plugins" class="btn btn-link">Plugins</a>
             {{- range . }}
-                {{- range .Metadata.AdminEndpoints }}
-            <a href="{{ printf "/admin%s" .Endpoint }}" class="btn btn-link">{{ .MenuName }}</a>
+                {{- $meta := .Metadata }}
+                {{- range .Metadata.AdminMenuItems }}
+            <a href="{{ printf "/admin/%s%s" $meta.Identifier .Endpoint }}" class="btn btn-link">{{ .MenuName }}</a>
                 {{- end }}
             {{- end }}
         </section>

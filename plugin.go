@@ -11,15 +11,15 @@ import (
 	"github.com/dfkdream/hugocms/plugin"
 )
 
-func newAuthenticatedReverseProxy(addr, path string) *httputil.ReverseProxy {
+func newAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{Director: func(req *http.Request) {
-		target, err := url.Parse(singleJoiningSlash(addr, path))
+		target, err := url.Parse(path)
 		if err != nil {
 			log.Fatal(err)
 		}
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
-		req.URL.Path = target.Path
+		req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
 
 		if target.RawQuery == "" || req.URL.RawPath == "" {
 			req.URL.RawQuery = target.RawQuery + req.URL.RawQuery
@@ -47,8 +47,8 @@ type pluginAPI struct {
 func (p pluginAPI) setupHandlers(router *mux.Router) {
 	router.Use(p.signIn.middleware(false))
 	for _, v := range p.config.Plugins {
-		for _, path := range v.Metadata.APIEndpoints {
-			router.Handle(path, newAuthenticatedReverseProxy(v.Addr, path))
-		}
+		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
+			http.StripPrefix("/api/"+v.Metadata.Identifier,
+				newAuthenticatedReverseProxy(singleJoiningSlash(v.Addr, "/api"))))
 	}
 }

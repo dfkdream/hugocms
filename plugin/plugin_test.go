@@ -23,7 +23,7 @@ func TestPlugin_ServeHTTP(t *testing.T) {
 		Author:      "Test",
 		Description: "Test Plugin",
 		Version:     "0.0.1",
-	})
+	}, "test")
 
 	p.HandleAdminPage("/hello", "hello", http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		_, _ = res.Write([]byte("Hello, world!"))
@@ -40,10 +40,8 @@ func TestPlugin_ServeHTTP(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(j, Metadata{
-		Info:              p.metadata.Info,
-		AdminEndpoints:    []adminEndpoint{{"hello", "/hello"}},
-		AdminAPIEndpoints: []string{},
-		APIEndpoints:      []string{},
+		Info:           p.metadata.Info,
+		AdminMenuItems: []adminMenuItem{{"hello", "/hello"}},
 	}) {
 		t.Error("metadata not equals")
 	}
