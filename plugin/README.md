@@ -9,5 +9,5 @@ Plugin addresses are separated by `,` (comma)
 ```
 ## Installation
 ```shell script
-go get github.com/dfkdream/HugoCMS/plugin
+go get github.com/dfkdream/hugocms/plugin
 ```

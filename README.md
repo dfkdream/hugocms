@@ -5,9 +5,9 @@ HugoCMS is Simple CMS for Self-Hosted Hugo Website.
 ## Features
 * Web-based file browser
 * WYSIWYG / Markdown Editor (based on [TOAST UI Editor](https://github.com/nhn/tui.editor))
-* [Plugin support](https://github.com/dfkdream/HugoCMS/tree/master/plugin)
+* [Plugin support](https://github.com/dfkdream/hugocms/tree/master/plugin)
 ## Build
-1. `git clone https://github.com/dfkdream/HugoCMS.git`
+1. `git clone https://github.com/dfkdream/hugocms.git`
 2. `docker build --tag hugo-cms .`
 ## Usage
 ```shell script
