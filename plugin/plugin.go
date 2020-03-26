@@ -96,16 +96,31 @@ func (p *Plugin) HandleAdminPage(path, menuName string, handler http.Handler) {
 	p.adminRouter.Handle(path, handler)
 }
 
+// AdminPageRouter returns admin page router.
+func (p *Plugin) AdminPageRouter() *mux.Router {
+	return p.adminRouter
+}
+
 // HandleAdminAPI handles admin only API handlers.
 // Non logged in requests will be rejected.
 func (p *Plugin) HandleAdminAPI(path string, handler http.Handler) {
 	p.adminAPIRouter.Handle(path, handler)
 }
 
+// AdminAPIRouter returns admin API router.
+func (p *Plugin) AdminAPIRouter() *mux.Router {
+	return p.adminAPIRouter
+}
+
 // HandleAPI handles API handlers.
 // Non logged in users can access these APIs.
 func (p *Plugin) HandleAPI(path string, handler http.Handler) {
 	p.apiRouter.Handle(path, handler)
+}
+
+// APIRouter returns API router.
+func (p *Plugin) APIRouter() *mux.Router {
+	return p.adminAPIRouter
 }
 
 // ServeHTTP dispatches the requests to plugin.
