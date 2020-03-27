@@ -87,7 +87,7 @@ func getEnvStringOr(key string, defaultValue string) string {
 }
 
 func getEnvBoolOr(key string, defaultValue bool) bool {
-	if value, err := strconv.ParseBool(os.Getenv(key)); err != nil {
+	if value, err := strconv.ParseBool(os.Getenv(key)); err == nil {
 		return value
 	}
 	return defaultValue
