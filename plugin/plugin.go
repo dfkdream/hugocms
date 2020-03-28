@@ -120,7 +120,7 @@ func (p *Plugin) HandleAPI(path string, handler http.Handler) {
 
 // APIRouter returns API router.
 func (p *Plugin) APIRouter() *mux.Router {
-	return p.adminAPIRouter
+	return p.apiRouter
 }
 
 // ServeHTTP dispatches the requests to plugin.
