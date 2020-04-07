@@ -8,9 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      SHA8: ${{ GITHUB_SHA::8 }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -19,6 +16,7 @@ jobs:
         run: |
           git fetch --depth=1 origin "+refs/tags/*:refs/tags/*"
           echo "::set-env name=LATEST_VERSION::$(git tag | tail -1)"
+          echo "::set-env name=SHA8::$(git rev-parse --short=8 $GITHUB_SHA)"
 
       - name: Build the Docker image
         run: docker build --tag "hugo-cms:$LATEST_VERSION.$SHA8" --tag hugo-cms:latest .
