@@ -11,6 +11,8 @@ require('../css/plugins.css');
 
 require('spectre.css/dist/spectre.min.css');
 
+require("../css/all.min.css");
+
 const popup = require('../js/popup');
 
 fetch("/admin/api/plugins")

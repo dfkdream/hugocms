@@ -4,14 +4,24 @@
             <a href="/admin/" class="navbar-brand mr-2">HugoCMS</a>
         </section>
         <section class="navbar-section">
-            <a href="/admin/config" class="btn btn-link">Config</a>
-            <a href="/admin/list/" class="btn btn-link">List</a>
-            <a href="/admin/plugins" class="btn btn-link">Plugins</a>
+            <a href="/" class="btn btn-link"><i class="fa fa-home"></i> Home</a>
+            <a href="/admin/config" class="btn btn-link"><i class="fa fa-wrench"></i> Config</a>
+            <a href="/admin/list/" class="btn btn-link"><i class="fa fa-sitemap"></i> Posts</a>
+            <a href="/admin/plugins" class="btn btn-link"><i class="fa fa-plug"></i> Plugins</a>
             {{- range . }}
+            <div class="dropdown dropdown-right">
+                <a href="#" class="btn btn-link dropdown-toggle">
+                    {{- .Metadata.Info.Name }} <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="menu">
                 {{- $meta := .Metadata }}
                 {{- range .Metadata.AdminMenuItems }}
-            <a href="{{ printf "/admin/%s%s" $meta.Identifier .Endpoint }}" class="btn btn-link">{{ .MenuName }}</a>
+                    <li class="menu-item">
+                        <a href="{{ printf "/admin/%s%s" $meta.Identifier .Endpoint }}">{{ .MenuName }}</a>
+                    </li>
                 {{- end }}
+                </ul>
+            </div>
             {{- end }}
         </section>
     </header>
