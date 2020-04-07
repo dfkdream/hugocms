@@ -25,5 +25,5 @@ jobs:
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u dfkdream --password-stdin
           docker tag "hugo-cms:$LATEST_VERSION.$SHA8" "docker.pkg.github.com/dfkdream/hugocms/hugo-cms:$LATEST_VERSION.$SHA8"
-          docker tag "hugo-cms:$LATEST_VERSION.$SHA8" "docker.pkg.github.com/dfkdream/hugocms/hugo-cms:latest"
-          docker push "docker.pkg.github.com/dfkdream/hugocms/hugo-cms:$LATEST_VERSION.$SHA8"
+          docker tag "hugo-cms:$LATEST_VERSION.$SHA8" "docker.pkg.github.com/dfkdream/hugocms/hugo-cms"
+          docker push "docker.pkg.github.com/dfkdream/hugocms/hugo-cms"
