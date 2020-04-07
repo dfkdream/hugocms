@@ -19,14 +19,14 @@ jobs:
           echo "::set-env name=SHA8::$(git rev-parse --short=8 $GITHUB_SHA)"
 
       - name: Build the Docker image
-        run: docker build --tag "hugocms:$LATEST_VERSION.$SHA8" --tag hugo-cms:latest .
+        run: docker build --tag "hugocms:$LATEST_VERSION.$SHA8" --tag hugocms:latest .
 
       - name: Upload image to GitHub packages
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u dfkdream --password-stdin
           docker tag "hugocms:$LATEST_VERSION.$SHA8" "docker.pkg.github.com/dfkdream/hugocms/hugocms:$LATEST_VERSION.$SHA8"
           docker tag "hugocms:$LATEST_VERSION.$SHA8" "docker.pkg.github.com/dfkdream/hugocms/hugocms"
-          docker push "docker.pkg.github.com/dfkdream/hugocms/hugo-cms"
+          docker push "docker.pkg.github.com/dfkdream/hugocms/hugocms"
 
       - name: Upload image to Docker Hub
         run: |
