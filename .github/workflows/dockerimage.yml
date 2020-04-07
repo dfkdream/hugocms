@@ -3,16 +3,21 @@ name: Docker Image CI
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
+    env:
+      SHA8: ${GITHUB_SHA::8}
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build --tag hugo-cms:$(date +%s) .
+      - name: Checkout
+        uses: actions/checkout@v2
+        run: |
+          git fetch --depth=1 origin "+refs/tags/*:refs/tags/*"
+          echo "::set-env name=LATEST_VERSION::$(git tag | tail -1)"
+
+      - name: Build the Docker image
+        run: docker build --tag "hugo-cms:$LATEST_VERSION.$SHA8" --tag hugo-cms:latest .
+
