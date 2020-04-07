@@ -11,7 +11,7 @@
             {{- range . }}
             <div class="dropdown dropdown-right">
                 <a href="#" class="btn btn-link dropdown-toggle">
-                    {{- .Metadata.Info.Name }} <i class="fa fa-caret-down"></i>
+                    {{ if .Metadata.Info.IconClass }}<i class="{{ .Metadata.Info.IconClass }}"></i> {{ end }}{{ .Metadata.Info.Name }} <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="menu">
                 {{- $meta := .Metadata }}

@@ -37,6 +37,7 @@ type Info struct {
 	Author      string `json:"author"`
 	Description string `json:"description"`
 	Version     string `json:"version"`
+	IconClass   string `json:"iconClass"`
 }
 
 type adminMenuItem struct {
