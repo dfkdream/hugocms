@@ -1,4 +1,6 @@
 # HugoCMS Plugin
+[![GoDoc](https://godoc.org/github.com/dfkdream/hugocms/plugin?status.svg)](https://godoc.org/github.com/dfkdream/hugocms/plugin)
+
 Plugin library for HugoCMS
 ## Adding Plugins to HugoCMS
 Use environment variable `PLUGINS` to add plugins to HugoCMS.
