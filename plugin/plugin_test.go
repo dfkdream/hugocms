@@ -1,12 +1,13 @@
 package plugin
 
 import (
-	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
+
+	"github.com/golang/protobuf/proto"
 )
 
 func get(url string) io.Reader {
@@ -32,18 +33,24 @@ func TestPlugin_ServeHTTP(t *testing.T) {
 	s := httptest.NewServer(p)
 	defer s.Close()
 
-	var j Metadata
-	err := json.NewDecoder(get(s.URL + "/metadata")).Decode(&j)
+	body, err := ioutil.ReadAll(get(s.URL + "/metadata"))
 	if err != nil {
-		t.Error(j)
+		t.Error(err)
 		t.FailNow()
 	}
 
-	if !reflect.DeepEqual(j, Metadata{
-		Identifier:     p.metadata.Identifier,
-		Info:           p.metadata.Info,
-		AdminMenuItems: []adminMenuItem{{"hello", "/hello"}},
-	}) {
+	j := new(Metadata)
+
+	err = proto.Unmarshal(body, j)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	if !(j.Identifier == "test" || j.Info.Name == "TestPlugin" ||
+		j.Info.Author == "Test" || j.Info.Author == "Test Plugin" ||
+		j.Info.Version == "1.0.0" || j.AdminMenuItems[0].MenuName == "hello" ||
+		j.AdminMenuItems[0].Endpoint == "/hello") {
 		t.Error("metadata not equals")
 	}
 }

@@ -1,0 +1,22 @@
+syntax = "proto3";
+package plugin;
+
+message info{
+    string name = 1;
+    string author = 2;
+    string description = 3;
+    string version = 4;
+    string icon_class = 5;
+}
+
+message metadata{
+    message admin_menu_item{
+        string menu_name = 1;
+        string endpoint = 2;
+    }
+
+    string identifier = 1;
+    info info = 2;
+    repeated admin_menu_item admin_menu_items = 3;
+}
+

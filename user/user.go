@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/dfkdream/hugocms/internal"
+	proto "github.com/golang/protobuf/proto"
 
 	"github.com/boltdb/bolt"
 
@@ -34,21 +35,6 @@ func validatePassword(password, hash, salt string) bool {
 	return fmt.Sprintf("%x", hashed) == hash
 }
 
-type User struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-	Hash     string `json:"hash"`
-	Salt     string `json:"salt"`
-}
-
-func (u User) String() string {
-	if res, err := json.Marshal(u); err == nil {
-		return string(res)
-	} else {
-		return ""
-	}
-}
-
 func New(id, username, password string) (*User, error) {
 	u := User{Id: id, Username: username}
 	var err error
@@ -59,8 +45,8 @@ func New(id, username, password string) (*User, error) {
 	return &u, nil
 }
 
-func (u User) Validate(id, password string) bool {
-	return u.Id == id && validatePassword(password, u.Hash, u.Salt)
+func (m User) Validate(id, password string) bool {
+	return m.Id == id && validatePassword(password, m.Hash, m.Salt)
 }
 
 type DB struct {
@@ -82,7 +68,10 @@ func (u DB) GetUser(id string) *User {
 		}
 		uptr = new(User)
 		if userData := c.Get([]byte(id)); userData != nil {
-			return json.Unmarshal(userData, uptr)
+			if err := proto.Unmarshal(userData, uptr); err != nil {
+				log.Println("protocol buffer unmarshal failed. falling back to json.")
+				return json.Unmarshal(userData, uptr)
+			}
 		}
 		return nil
 	})
@@ -99,7 +88,7 @@ func (u DB) SetUser(user *User) {
 		if err != nil {
 			return err
 		}
-		u, err := json.Marshal(user)
+		u, err := proto.Marshal(user)
 		if err != nil {
 			return err
 		}

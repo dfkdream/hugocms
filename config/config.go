@@ -2,12 +2,15 @@ package config
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 
 	"github.com/dfkdream/hugocms/internal"
 
@@ -102,8 +105,15 @@ func getPluginMetadata(pluginAddr string) (*plugin.Metadata, error) {
 		return nil, err
 	}
 	defer func() { _ = res.Body.Close() }()
+
 	m := new(plugin.Metadata)
-	err = json.NewDecoder(res.Body).Decode(m)
+
+	metaProto, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = proto.Unmarshal(metaProto, m)
 	if err != nil {
 		return nil, err
 	}

@@ -2,9 +2,11 @@ package plugin
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/dfkdream/hugocms/user"
+	"github.com/golang/protobuf/proto"
 
 	"github.com/gorilla/mux"
 )
@@ -15,42 +17,6 @@ var (
 	// ContextKeyUser is context key for user data
 	ContextKeyUser = contextKey("user")
 )
-
-// User contains user information
-type User struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-}
-
-// String converts user to json string
-func (u User) String() string {
-	if res, err := json.Marshal(u); err == nil {
-		return string(res)
-	} else {
-		return ""
-	}
-}
-
-// Info contains information about plugin which will be displayed on HugoCMS dashboard.
-type Info struct {
-	Name        string `json:"name"`
-	Author      string `json:"author"`
-	Description string `json:"description"`
-	Version     string `json:"version"`
-	IconClass   string `json:"iconClass"`
-}
-
-type adminMenuItem struct {
-	MenuName string `json:"menuName"`
-	Endpoint string `json:"endpoint"`
-}
-
-// Metadata contains metadata about plugin
-type Metadata struct {
-	Identifier     string          `json:"identifier"`
-	Info           Info            `json:"info"`
-	AdminMenuItems []adminMenuItem `json:"adminMenuItems"`
-}
 
 // Plugin is HugoCMS Plugin which implements http.Handler.
 type Plugin struct {
@@ -67,8 +33,8 @@ func New(Info Info, Identifier string) *Plugin {
 		router: mux.NewRouter().StrictSlash(true),
 		metadata: &Metadata{
 			Identifier:     Identifier,
-			Info:           Info,
-			AdminMenuItems: make([]adminMenuItem, 0),
+			Info:           &Info,
+			AdminMenuItems: make([]*MetadataAdminMenuItem, 0),
 		},
 	}
 	p.adminRouter = p.router.PathPrefix("/admin").Subrouter().StrictSlash(true)
@@ -76,12 +42,13 @@ func New(Info Info, Identifier string) *Plugin {
 	p.apiRouter = p.router.PathPrefix("/api").Subrouter().StrictSlash(true)
 
 	p.router.HandleFunc("/metadata", func(res http.ResponseWriter, req *http.Request) {
-		err := json.NewEncoder(res).Encode(p.metadata)
+		meta, err := proto.Marshal(p.metadata)
 		if err != nil {
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 			log.Println(err)
 			return
 		}
+		_, err = res.Write(meta)
 	})
 
 	p.router.HandleFunc("/live", func(res http.ResponseWriter, req *http.Request) {
@@ -93,7 +60,7 @@ func New(Info Info, Identifier string) *Plugin {
 // menuName will be displayed on navigation bar.
 // Handler should write HTML document.
 func (p *Plugin) HandleAdminPage(path, menuName string, handler http.Handler) {
-	p.metadata.AdminMenuItems = append(p.metadata.AdminMenuItems, adminMenuItem{Endpoint: path, MenuName: menuName})
+	p.metadata.AdminMenuItems = append(p.metadata.AdminMenuItems, &MetadataAdminMenuItem{Endpoint: path, MenuName: menuName})
 	p.adminRouter.Handle(path, handler)
 }
 
@@ -127,8 +94,8 @@ func (p *Plugin) APIRouter() *mux.Router {
 // ServeHTTP dispatches the requests to plugin.
 func (p *Plugin) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if h := req.Header.Get("X-HugoCMS-User"); h != "" {
-		u := new(User)
-		err := json.Unmarshal([]byte(h), &u)
+		u := new(user.User)
+		err := proto.UnmarshalText(h, u)
 		if err != nil {
 			http.Error(res, "Bad Request", http.StatusBadRequest)
 			log.Println(err)

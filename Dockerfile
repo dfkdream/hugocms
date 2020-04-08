@@ -4,11 +4,9 @@ RUN apk update && apk upgrade
 
 WORKDIR /hugocms
 
-COPY ./*.go ./
+COPY . .
 
-COPY ./plugin/*.go ./plugin/
-
-COPY ./go.* ./
+RUN find . -type f ! -name '*.go' -and ! -name 'go.*' -delete
 
 RUN go get
 

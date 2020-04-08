@@ -274,7 +274,7 @@ func (a AdminAPI) pluginsAPI(res http.ResponseWriter, req *http.Request) {
 	case "GET":
 		i := make([]pluginInfo, len(a.Conf.Plugins))
 		for idx, v := range a.Conf.Plugins {
-			i[idx] = pluginInfo{v.Metadata.Info, config.CheckPluginLive(v.Addr)}
+			i[idx] = pluginInfo{*v.Metadata.Info, config.CheckPluginLive(v.Addr)}
 		}
 		err := json.NewEncoder(res).Encode(i)
 		if err != nil {

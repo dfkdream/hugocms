@@ -13,8 +13,6 @@ import (
 	"github.com/dfkdream/hugocms/user"
 
 	"github.com/gorilla/mux"
-
-	"github.com/dfkdream/hugocms/plugin"
 )
 
 func NewAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
@@ -40,7 +38,9 @@ func NewAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
 		req.Header.Del("X-HugoCMS-User")
 
 		if u, ok := req.Context().Value(signin.ContextKeyUser).(*user.User); ok {
-			req.Header.Set("X-HugoCMS-User", plugin.User{ID: u.Id, Username: u.Username}.String())
+			u.Hash = ""
+			u.Salt = ""
+			req.Header.Set("X-HugoCMS-User", u.String())
 		}
 	}}
 }
