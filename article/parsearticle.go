@@ -1,4 +1,4 @@
-package main
+package article
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type frontMatter struct {
+type FrontMatter struct {
 	Title           string    `json:"title"`
 	Subtitle        string    `json:"subtitle"`
 	Date            time.Time `json:"date"`
@@ -21,18 +21,18 @@ type frontMatter struct {
 	ShowDate        bool      `json:"showDate"`
 }
 
-type article struct {
-	FrontMatter frontMatter `json:"frontMatter"`
+type Article struct {
+	FrontMatter FrontMatter `json:"frontMatter"`
 	Body        string      `json:"body"`
 }
 
-func (f frontMatter) String() string {
+func (f FrontMatter) String() string {
 	res, _ := json.MarshalIndent(f, "", "    ")
 	return string(res)
 }
 
-func parseArticle(reader io.Reader) (*article, error) {
-	var result frontMatter
+func Parse(reader io.Reader) (*Article, error) {
+	var result FrontMatter
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -42,5 +42,5 @@ func parseArticle(reader io.Reader) (*article, error) {
 		return nil, err
 	}
 	bString := strings.TrimSpace(strings.TrimPrefix(string(body), result.String()))
-	return &article{FrontMatter: result, Body: bString}, nil
+	return &Article{FrontMatter: result, Body: bString}, nil
 }

@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -9,15 +9,17 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dfkdream/hugocms/internal"
+
 	"github.com/dfkdream/hugocms/plugin"
 )
 
-type pluginData struct {
+type PluginData struct {
 	Addr     string          `json:"addr"`
 	Metadata plugin.Metadata `json:"metadata"`
 }
 
-type config struct {
+type Config struct {
 	Dir         string
 	ConfigPath  string
 	ContentPath string
@@ -27,10 +29,10 @@ type config struct {
 	TLS         bool
 	CertPath    string
 	KeyPath     string
-	Plugins     []pluginData
+	Plugins     []PluginData
 }
 
-func (c config) String() string {
+func (c Config) String() string {
 	if res, err := json.MarshalIndent(c, "", "    "); err == nil {
 		return string(res)
 	} else {
@@ -38,15 +40,15 @@ func (c config) String() string {
 	}
 }
 
-func getConfig() *config {
-	cfg := config{
+func GetConfig() *Config {
+	cfg := Config{
 		Dir:      getEnvStringOr("DIR", "."),
 		Bind:     getEnvStringOr("BIND", "0.0.0.0:80"),
 		BoltPath: getEnvStringOr("BOLT", "./bolt.db"),
 		TLS:      getEnvBoolOr("TLS", false),
 		CertPath: getEnvStringOr("CERT", "./cert.pem"),
 		KeyPath:  getEnvStringOr("KEY", "./key.pem"),
-		Plugins:  make([]pluginData, 0),
+		Plugins:  make([]PluginData, 0),
 	}
 	cfg.ConfigPath = getEnvStringOr("CONFIG", filepath.Join(cfg.Dir, "config.yaml"))
 	cfg.ContentPath = getEnvStringOr("CONTENT", filepath.Join(cfg.Dir, "/content"))
@@ -57,10 +59,10 @@ func getConfig() *config {
 		for _, v := range strings.Split(ps, ",") {
 			pluginAddr := strings.TrimSpace(v)
 			if !strings.HasPrefix(pluginAddr, "http") {
-				pluginAddr = singleJoiningSlash("http://", pluginAddr)
+				pluginAddr = internal.SingleJoiningSlash("http://", pluginAddr)
 			}
 
-			if !checkPluginLive(pluginAddr) {
+			if !CheckPluginLive(pluginAddr) {
 				log.Fatalf("plugin %s: plugin does not response", pluginAddr)
 			}
 
@@ -69,7 +71,7 @@ func getConfig() *config {
 				log.Fatal(err)
 			}
 
-			cfg.Plugins = append(cfg.Plugins, pluginData{
+			cfg.Plugins = append(cfg.Plugins, PluginData{
 				Addr:     pluginAddr,
 				Metadata: *m,
 			})
@@ -93,20 +95,8 @@ func getEnvBoolOr(key string, defaultValue bool) bool {
 	return defaultValue
 }
 
-func singleJoiningSlash(a, b string) string {
-	aSlash := strings.HasSuffix(a, "/")
-	bSlash := strings.HasPrefix(b, "/")
-	switch {
-	case aSlash && bSlash:
-		return a + b[1:]
-	case !aSlash && !bSlash:
-		return a + "/" + b
-	}
-	return a + b
-}
-
 func getPluginMetadata(pluginAddr string) (*plugin.Metadata, error) {
-	addr := singleJoiningSlash(pluginAddr, "metadata")
+	addr := internal.SingleJoiningSlash(pluginAddr, "metadata")
 	res, err := http.Get(addr)
 	if err != nil {
 		return nil, err
@@ -120,8 +110,8 @@ func getPluginMetadata(pluginAddr string) (*plugin.Metadata, error) {
 	return m, nil
 }
 
-func checkPluginLive(pluginAddr string) bool {
-	addr := singleJoiningSlash(pluginAddr, "live")
+func CheckPluginLive(pluginAddr string) bool {
+	addr := internal.SingleJoiningSlash(pluginAddr, "live")
 	res, err := http.Get(addr)
 	if err != nil {
 		return false

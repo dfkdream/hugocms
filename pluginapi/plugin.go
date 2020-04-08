@@ -1,4 +1,4 @@
-package main
+package pluginapi
 
 import (
 	"log"
@@ -6,12 +6,18 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"github.com/dfkdream/hugocms/config"
+
+	"github.com/dfkdream/hugocms/internal"
+	"github.com/dfkdream/hugocms/signin"
+	"github.com/dfkdream/hugocms/user"
+
 	"github.com/gorilla/mux"
 
 	"github.com/dfkdream/hugocms/plugin"
 )
 
-func newAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
+func NewAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{Director: func(req *http.Request) {
 		target, err := url.Parse(path)
 		if err != nil {
@@ -19,7 +25,7 @@ func newAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
 		}
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
-		req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
+		req.URL.Path = internal.SingleJoiningSlash(target.Path, req.URL.Path)
 
 		if target.RawQuery == "" || req.URL.RawPath == "" {
 			req.URL.RawQuery = target.RawQuery + req.URL.RawQuery
@@ -33,22 +39,22 @@ func newAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
 
 		req.Header.Del("X-HugoCMS-User")
 
-		if u, ok := req.Context().Value(contextKeyUser).(*user); ok {
-			req.Header.Set("X-HugoCMS-User", plugin.User{ID: u.ID, Username: u.Username}.String())
+		if u, ok := req.Context().Value(signin.ContextKeyUser).(*user.User); ok {
+			req.Header.Set("X-HugoCMS-User", plugin.User{ID: u.Id, Username: u.Username}.String())
 		}
 	}}
 }
 
-type pluginAPI struct {
-	config *config
-	signIn *signInHandler
+type PluginAPI struct {
+	Config *config.Config
+	SignIn *signin.SignInHandler
 }
 
-func (p pluginAPI) setupHandlers(router *mux.Router) {
-	router.Use(p.signIn.middleware(false))
-	for _, v := range p.config.Plugins {
+func (p PluginAPI) SetupHandlers(router *mux.Router) {
+	router.Use(p.SignIn.Middleware(false))
+	for _, v := range p.Config.Plugins {
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
 			http.StripPrefix("/api/"+v.Metadata.Identifier,
-				newAuthenticatedReverseProxy(singleJoiningSlash(v.Addr, "/api"))))
+				NewAuthenticatedReverseProxy(internal.SingleJoiningSlash(v.Addr, "/api"))))
 	}
 }

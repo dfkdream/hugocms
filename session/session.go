@@ -1,25 +1,29 @@
-package main
+package session
 
 import (
 	"sync"
 	"time"
+
+	"github.com/dfkdream/hugocms/internal"
+
+	"github.com/dfkdream/hugocms/user"
 )
 
 type session struct {
-	user      *user
+	user      *user.User
 	ip        string
 	validThru time.Time
 }
 
-type sessionDB struct {
+type DB struct {
 	db                map[string]*session
 	sessionExtendable bool
 	tokenTTL          time.Duration
 	mutex             *sync.Mutex
 }
 
-func newSessionDB(sessionExtendable bool, tokenTTL time.Duration) *sessionDB {
-	return &sessionDB{
+func NewDB(sessionExtendable bool, tokenTTL time.Duration) *DB {
+	return &DB{
 		db:                make(map[string]*session),
 		sessionExtendable: sessionExtendable,
 		tokenTTL:          tokenTTL,
@@ -27,16 +31,16 @@ func newSessionDB(sessionExtendable bool, tokenTTL time.Duration) *sessionDB {
 	}
 }
 
-func (s *sessionDB) register(user *user, ip string) string {
+func (s *DB) Register(user *user.User, ip string) string {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	key := generateRandomKey(64)
+	key := internal.GenerateRandomKey(64)
 	s.db[key] = &session{user, ip, time.Now().Add(s.tokenTTL)}
 	return key
 }
 
-func (s *sessionDB) validate(key string, ip string) (bool, *user) {
+func (s *DB) Validate(key string, ip string) (bool, *user.User) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 

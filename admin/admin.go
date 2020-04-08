@@ -1,4 +1,4 @@
-package main
+package admin
 
 import (
 	"html/template"
@@ -8,37 +8,43 @@ import (
 	"path"
 	"time"
 
-	"github.com/dfkdream/hugocms/plugin"
+	"github.com/dfkdream/hugocms/internal"
+
+	"github.com/dfkdream/hugocms/config"
+
+	"github.com/dfkdream/hugocms/signin"
+
+	"github.com/dfkdream/hugocms/user"
 
 	"github.com/gorilla/mux"
 )
 
-type admin struct {
-	signIn *signInHandler
-	t      *template.Template
-	config *config
+type Admin struct {
+	SignIn *signin.SignInHandler
+	T      *template.Template
+	Config *config.Config
 }
 
 type templateVars struct {
 	Title   string
-	Plugins []pluginData
+	Plugins []config.PluginData
 	Body    template.HTML
 }
 
-func (a admin) setupHandlers(router *mux.Router) {
-	router.Use(a.signIn.middleware(true))
+func (a Admin) SetupHandlers(router *mux.Router) {
+	router.Use(a.SignIn.Middleware(true))
 
 	router.PathPrefix("/assets").Handler(
 		http.StripPrefix("/admin/assets/", http.FileServer(http.Dir("./assets"))))
 
-	router.Handle("/signin", a.signIn)
+	router.Handle("/signin", a.SignIn)
 
 	router.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/admin/list/", http.StatusFound)
 	})
 
 	router.PathPrefix("/list/").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		err := a.t.ExecuteTemplate(res, "list.html", templateVars{Plugins: a.config.Plugins})
+		err := a.T.ExecuteTemplate(res, "list.html", templateVars{Plugins: a.Config.Plugins})
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
@@ -46,7 +52,7 @@ func (a admin) setupHandlers(router *mux.Router) {
 	})
 
 	router.PathPrefix("/edit").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		err := a.t.ExecuteTemplate(res, "edit.html", templateVars{Plugins: a.config.Plugins})
+		err := a.T.ExecuteTemplate(res, "edit.html", templateVars{Plugins: a.Config.Plugins})
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
@@ -54,7 +60,7 @@ func (a admin) setupHandlers(router *mux.Router) {
 	})
 
 	router.HandleFunc("/config", func(res http.ResponseWriter, req *http.Request) {
-		err := a.t.ExecuteTemplate(res, "config.html", templateVars{Plugins: a.config.Plugins})
+		err := a.T.ExecuteTemplate(res, "config.html", templateVars{Plugins: a.Config.Plugins})
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
@@ -62,25 +68,25 @@ func (a admin) setupHandlers(router *mux.Router) {
 	})
 
 	router.HandleFunc("/plugins", func(res http.ResponseWriter, req *http.Request) {
-		err := a.t.ExecuteTemplate(res, "plugins.html", templateVars{Plugins: a.config.Plugins})
+		err := a.T.ExecuteTemplate(res, "plugins.html", templateVars{Plugins: a.Config.Plugins})
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 		}
 	})
 
-	for _, v := range a.config.Plugins {
+	for _, v := range a.Config.Plugins {
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
 			http.StripPrefix("/admin/"+v.Metadata.Identifier, http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-				r, err := http.NewRequest("GET", singleJoiningSlash(v.Addr, path.Join("/admin", req.URL.Path)), nil)
+				r, err := http.NewRequest("GET", internal.SingleJoiningSlash(v.Addr, path.Join("/admin", req.URL.Path)), nil)
 				if err != nil {
 					log.Println(err)
 					http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 					return
 				}
 
-				if u, ok := req.Context().Value(contextKeyUser).(*user); ok {
-					r.Header.Set("X-HugoCMS-User", plugin.User{ID: u.ID, Username: u.Username}.String())
+				if u, ok := req.Context().Value(signin.ContextKeyUser).(*user.User); ok {
+					r.Header.Set("X-HugoCMS-User", u.String())
 				}
 
 				resp, err := (&http.Client{Timeout: 10 * time.Second}).Do(r)
@@ -97,7 +103,7 @@ func (a admin) setupHandlers(router *mux.Router) {
 					return
 				}
 				res.WriteHeader(resp.StatusCode)
-				err = a.t.ExecuteTemplate(res, "plugin.html", templateVars{Plugins: a.config.Plugins, Title: v.Metadata.Info.Name, Body: template.HTML(body)})
+				err = a.T.ExecuteTemplate(res, "plugin.html", templateVars{Plugins: a.Config.Plugins, Title: v.Metadata.Info.Name, Body: template.HTML(body)})
 				if err != nil {
 					log.Println(err)
 					http.Error(res, "Internal Server Error", http.StatusInternalServerError)

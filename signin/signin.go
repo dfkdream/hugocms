@@ -1,14 +1,17 @@
-package main
+package signin
 
 import (
 	"context"
-	"crypto/rand"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dfkdream/hugocms/internal"
+
+	"github.com/dfkdream/hugocms/session"
+	"github.com/dfkdream/hugocms/user"
 
 	"github.com/gorilla/mux"
 )
@@ -16,14 +19,8 @@ import (
 type contextKey string
 
 var (
-	contextKeyUser = contextKey("user")
+	ContextKeyUser = contextKey("user")
 )
-
-func generateRandomKey(bytes int) string {
-	buff := make([]byte, bytes)
-	_, _ = rand.Read(buff)
-	return fmt.Sprintf("%x", buff)
-}
 
 func mustReadCookie(key string, req *http.Request) string {
 	if ck, err := req.Cookie(key); err == nil {
@@ -36,17 +33,17 @@ func readIP(req *http.Request) string {
 	return strings.Split(req.RemoteAddr, ":")[0]
 }
 
-type signInHandler struct {
+type SignInHandler struct {
 	signInURL string
 	assetsURL string
 	apiURL    string
-	sessionDB *sessionDB
-	userDB    *userDB
+	sessionDB *session.DB
+	userDB    *user.DB
 	template  *template.Template
 }
 
-func newSignInHandler(signInURL, assetsURL, apiURL string, sessionDB *sessionDB, userDB *userDB, template *template.Template) *signInHandler {
-	return &signInHandler{
+func NewSignInHandler(signInURL, assetsURL, apiURL string, sessionDB *session.DB, userDB *user.DB, template *template.Template) *SignInHandler {
+	return &SignInHandler{
 		signInURL: signInURL,
 		assetsURL: assetsURL,
 		apiURL:    apiURL,
@@ -56,7 +53,7 @@ func newSignInHandler(signInURL, assetsURL, apiURL string, sessionDB *sessionDB,
 	}
 }
 
-func (s signInHandler) middleware(blocking bool) mux.MiddlewareFunc {
+func (s SignInHandler) Middleware(blocking bool) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 
@@ -65,14 +62,14 @@ func (s signInHandler) middleware(blocking bool) mux.MiddlewareFunc {
 				return
 			}
 
-			if ok, user := s.sessionDB.validate(mustReadCookie("sess", req), readIP(req)); ok {
-				req = req.WithContext(context.WithValue(req.Context(), contextKeyUser, user))
+			if ok, u := s.sessionDB.Validate(mustReadCookie("sess", req), readIP(req)); ok {
+				req = req.WithContext(context.WithValue(req.Context(), ContextKeyUser, u))
 				next.ServeHTTP(res, req)
 				return
 			}
 
 			if strings.HasPrefix(req.URL.Path, s.apiURL) {
-				http.Error(res, jsonStatusForbidden, http.StatusForbidden)
+				http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
 				return
 			}
 
@@ -85,7 +82,7 @@ func (s signInHandler) middleware(blocking bool) mux.MiddlewareFunc {
 	}
 }
 
-func (s signInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (s SignInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET": // Sign in page
 		redirect := req.URL.Query().Get("redirect")
@@ -113,14 +110,14 @@ func (s signInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if s.userDB.size() == 0 { // Create admin user if DB is empty
-			u, err := newUser(id, "admin", password)
+		if s.userDB.Size() == 0 { // Create admin user if DB is empty
+			u, err := user.New(id, "admin", password)
 			if err != nil {
 				log.Println(err)
 				http.Redirect(res, req, s.signInURL+"?redirect="+redirect, http.StatusFound)
 				return
 			}
-			err = s.userDB.addUser(u)
+			err = s.userDB.AddUser(u)
 			if err != nil {
 				log.Println(err)
 				http.Redirect(res, req, s.signInURL+"?redirect="+redirect, http.StatusFound)
@@ -128,9 +125,9 @@ func (s signInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 
-		if user := s.userDB.getUser(id); user != nil {
-			if user.validate(id, password) {
-				token := s.sessionDB.register(user, readIP(req))
+		if u := s.userDB.GetUser(id); u != nil {
+			if u.Validate(id, password) {
+				token := s.sessionDB.Register(u, readIP(req))
 				http.SetCookie(res, &http.Cookie{
 					Name:     "sess",
 					Value:    token,

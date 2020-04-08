@@ -1,4 +1,4 @@
-package main
+package article
 
 import (
 	"reflect"
@@ -23,7 +23,7 @@ var (
 }`
 	dummyArticle = "hello world"
 	dummyFile    = dummyFront + "\n" + dummyArticle
-	f            = frontMatter{
+	f            = FrontMatter{
 		Title:           "hello world",
 		Subtitle:        "",
 		Date:            MustParseTime(time.Parse(time.RFC3339, "2019-12-03T00:00:00Z")),
@@ -50,7 +50,7 @@ func TestFrontMatter_String(t *testing.T) {
 }
 
 func TestParseArticle(t *testing.T) {
-	a, err := parseArticle(strings.NewReader(dummyFile))
+	a, err := Parse(strings.NewReader(dummyFile))
 	if err != nil {
 		t.Error(err)
 	}

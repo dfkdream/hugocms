@@ -8,6 +8,18 @@ import (
 	"os"
 	"time"
 
+	"github.com/dfkdream/hugocms/pluginapi"
+
+	"github.com/dfkdream/hugocms/adminapi"
+
+	"github.com/dfkdream/hugocms/admin"
+	"github.com/dfkdream/hugocms/hugo"
+
+	"github.com/dfkdream/hugocms/config"
+	"github.com/dfkdream/hugocms/session"
+	"github.com/dfkdream/hugocms/signin"
+	"github.com/dfkdream/hugocms/user"
+
 	"github.com/boltdb/bolt"
 
 	"github.com/gorilla/handlers"
@@ -15,7 +27,7 @@ import (
 )
 
 func main() {
-	cfg := getConfig()
+	cfg := config.GetConfig()
 
 	fmt.Println(cfg)
 
@@ -29,25 +41,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	hg := newHugo(cfg)
+	hg := hugo.New(cfg)
 
 	r := mux.NewRouter().StrictSlash(true)
 
-	signin := newSignInHandler(
+	s := signin.NewSignInHandler(
 		"/admin/signin",
 		"/admin/assets/",
 		"/admin/api/",
-		newSessionDB(true, 10*time.Minute),
-		newUserDB(db),
+		session.NewDB(true, 10*time.Minute),
+		user.NewDB(db),
 		t)
 
 	rAdmin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)
 
-	admin{signIn: signin, t: t, config: cfg}.setupHandlers(rAdmin)
+	admin.Admin{SignIn: s, T: t, Config: cfg}.SetupHandlers(rAdmin)
 
-	adminAPI{conf: cfg, hugo: hg}.setupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
+	adminapi.AdminAPI{Conf: cfg, Hugo: hg}.SetupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
-	pluginAPI{config: cfg, signIn: signin}.setupHandlers(r.PathPrefix("/api").Subrouter().StrictSlash(true))
+	pluginapi.PluginAPI{Config: cfg, SignIn: s}.SetupHandlers(r.PathPrefix("/api").Subrouter().StrictSlash(true))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir(cfg.PublicPath)))
 

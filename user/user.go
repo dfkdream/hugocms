@@ -1,17 +1,24 @@
-package main
+package user
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+
+	"github.com/dfkdream/hugocms/internal"
 
 	"github.com/boltdb/bolt"
 
 	"golang.org/x/crypto/scrypt"
 )
 
+var (
+	ErrDuplicatedUser = errors.New("duplicated user found")
+)
+
 func hashPassword(password string) (string, string, error) {
-	salt := generateRandomKey(32)
+	salt := internal.GenerateRandomKey(32)
 	hashed, err := scrypt.Key([]byte(password), []byte(salt), 32768, 8, 1, 32)
 	if err != nil {
 		return "", "", err
@@ -27,14 +34,14 @@ func validatePassword(password, hash, salt string) bool {
 	return fmt.Sprintf("%x", hashed) == hash
 }
 
-type user struct {
-	ID       string `json:"id"`
+type User struct {
+	Id       string `json:"id"`
 	Username string `json:"username"`
 	Hash     string `json:"hash"`
 	Salt     string `json:"salt"`
 }
 
-func (u user) String() string {
+func (u User) String() string {
 	if res, err := json.Marshal(u); err == nil {
 		return string(res)
 	} else {
@@ -42,8 +49,8 @@ func (u user) String() string {
 	}
 }
 
-func newUser(id, username, password string) (*user, error) {
-	u := user{ID: id, Username: username}
+func New(id, username, password string) (*User, error) {
+	u := User{Id: id, Username: username}
 	var err error
 	u.Hash, u.Salt, err = hashPassword(password)
 	if err != nil {
@@ -52,28 +59,28 @@ func newUser(id, username, password string) (*user, error) {
 	return &u, nil
 }
 
-func (u user) validate(id, password string) bool {
-	return u.ID == id && validatePassword(password, u.Hash, u.Salt)
+func (u User) Validate(id, password string) bool {
+	return u.Id == id && validatePassword(password, u.Hash, u.Salt)
 }
 
-type userDB struct {
+type DB struct {
 	db *bolt.DB
 }
 
-func newUserDB(db *bolt.DB) *userDB {
-	return &userDB{
+func NewDB(db *bolt.DB) *DB {
+	return &DB{
 		db: db,
 	}
 }
 
-func (u userDB) getUser(id string) *user {
-	var uptr *user
+func (u DB) GetUser(id string) *User {
+	var uptr *User
 	err := u.db.View(func(tx *bolt.Tx) error {
 		c := tx.Bucket([]byte("users"))
 		if c == nil {
 			return nil
 		}
-		uptr = new(user)
+		uptr = new(User)
 		if userData := c.Get([]byte(id)); userData != nil {
 			return json.Unmarshal(userData, uptr)
 		}
@@ -86,7 +93,7 @@ func (u userDB) getUser(id string) *user {
 	return uptr
 }
 
-func (u *userDB) setUser(user *user) {
+func (u DB) SetUser(user *User) {
 	err := u.db.Update(func(tx *bolt.Tx) error {
 		c, err := tx.CreateBucketIfNotExists([]byte("users"))
 		if err != nil {
@@ -96,22 +103,22 @@ func (u *userDB) setUser(user *user) {
 		if err != nil {
 			return err
 		}
-		return c.Put([]byte(user.ID), u)
+		return c.Put([]byte(user.Id), u)
 	})
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (u *userDB) addUser(user *user) error {
-	if u.getUser(user.ID) == nil {
-		u.setUser(user)
+func (u DB) AddUser(user *User) error {
+	if u.GetUser(user.Id) == nil {
+		u.SetUser(user)
 		return nil
 	}
-	return errDuplicatedUser
+	return ErrDuplicatedUser
 }
 
-func (u userDB) size() int {
+func (u DB) Size() int {
 	result := 0
 	_ = u.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("users"))
