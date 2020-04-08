@@ -34,12 +34,12 @@ RUN apk update && apk upgrade
 
 RUN apk add hugo
 
-WORKDIR /bin
+WORKDIR /hugocms
 
 COPY --from=webpack /webpack/dist ./assets/
 
 COPY ./html ./html
 
-COPY --from=build /hugocms .
+COPY --from=build /hugocms/hugocms .
 
 ENTRYPOINT ["./hugocms"]
