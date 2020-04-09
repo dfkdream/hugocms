@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dfkdream/hugocms/protowrapper"
+
 	"github.com/dfkdream/hugocms/user"
 	"github.com/golang/protobuf/proto"
 
@@ -42,13 +44,12 @@ func New(Info Info, Identifier string) *Plugin {
 	p.apiRouter = p.router.PathPrefix("/api").Subrouter().StrictSlash(true)
 
 	p.router.HandleFunc("/metadata", func(res http.ResponseWriter, req *http.Request) {
-		meta, err := proto.Marshal(p.metadata)
+		err := protowrapper.NewEncoder(res).Encode(p.metadata)
 		if err != nil {
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 			log.Println(err)
 			return
 		}
-		_, err = res.Write(meta)
 	})
 
 	p.router.HandleFunc("/live", func(res http.ResponseWriter, req *http.Request) {

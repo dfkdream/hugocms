@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/dfkdream/hugocms/protowrapper"
 
 	"github.com/dfkdream/hugocms/internal"
 
@@ -108,12 +107,7 @@ func getPluginMetadata(pluginAddr string) (*plugin.Metadata, error) {
 
 	m := new(plugin.Metadata)
 
-	metaProto, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	err = proto.Unmarshal(metaProto, m)
+	err = protowrapper.NewDecoder(res.Body).Decode(m)
 	if err != nil {
 		return nil, err
 	}
