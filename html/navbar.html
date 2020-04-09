@@ -10,9 +10,9 @@
             <a href="/admin/plugins" class="btn btn-link"><i class="fa fa-plug"></i> Plugins</a>
             {{- range . }}
             <div class="dropdown dropdown-right">
-                <a href="#" class="btn btn-link dropdown-toggle">
+                <span class="btn btn-link dropdown-toggle" tabindex="0">
                     {{ if .Metadata.Info.IconClass }}<i class="{{ .Metadata.Info.IconClass }}"></i> {{ end }}{{ .Metadata.Info.Name }} <i class="fa fa-caret-down"></i>
-                </a>
+                </span>
                 <ul class="menu">
                 {{- $meta := .Metadata }}
                 {{- range .Metadata.AdminMenuItems }}
