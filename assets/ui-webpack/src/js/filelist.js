@@ -103,6 +103,7 @@ module.exports = class fileList{
                 if (err instanceof Promise) {
                     err.then(json => {
                         if (json.code === 404) location.href = "/admin/list/";
+                        else if (json.code === 403) location.reload();
                         else popup.alert(document.body, "Error", `${json.code} ${json.message}`);
                     })
                         .catch(() => popup.alert(document.body, "Error", "Unknown error occurred. Please reload."));
