@@ -18,6 +18,10 @@ var (
 	ErrDuplicatedUser = errors.New("duplicated user found")
 )
 
+var (
+	bucketKeyUsers = []byte("users")
+)
+
 func hashPassword(password string) (string, string, error) {
 	salt := internal.GenerateRandomKey(32)
 	hashed, err := scrypt.Key([]byte(password), []byte(salt), 32768, 8, 1, 32)
@@ -62,7 +66,7 @@ func NewDB(db *bolt.DB) *DB {
 func (u DB) GetAllUsers() []*User {
 	result := make([]*User, 0)
 	err := u.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("users"))
+		b := tx.Bucket(bucketKeyUsers)
 		if b == nil {
 			return nil
 		}
@@ -92,7 +96,7 @@ func (u DB) GetAllUsers() []*User {
 func (u DB) GetUser(id string) *User {
 	var uptr *User
 	err := u.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte("users"))
+		c := tx.Bucket(bucketKeyUsers)
 		if c == nil {
 			return nil
 		}
@@ -114,7 +118,7 @@ func (u DB) GetUser(id string) *User {
 
 func (u DB) SetUser(user *User) {
 	err := u.db.Update(func(tx *bolt.Tx) error {
-		c, err := tx.CreateBucketIfNotExists([]byte("users"))
+		c, err := tx.CreateBucketIfNotExists(bucketKeyUsers)
 		if err != nil {
 			return err
 		}
@@ -140,7 +144,7 @@ func (u DB) AddUser(user *User) error {
 func (u DB) Size() int {
 	result := 0
 	_ = u.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("users"))
+		b := tx.Bucket(bucketKeyUsers)
 		if b == nil {
 			return nil
 		}
