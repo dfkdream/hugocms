@@ -106,6 +106,8 @@ func (u DB) GetUser(id string) *User {
 				log.Println("protocol buffer unmarshal failed. falling back to json.")
 				return json.Unmarshal(userData, uptr)
 			}
+		} else {
+			uptr = nil
 		}
 		return nil
 	})
