@@ -28,8 +28,9 @@ import (
 )
 
 type AdminAPI struct {
-	Conf *config.Config
-	Hugo *hugo.Hugo
+	Conf   *config.Config
+	Hugo   *hugo.Hugo
+	UserDB *user.DB
 }
 
 func (a AdminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
@@ -280,6 +281,50 @@ func (a AdminAPI) pluginsAPI(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Println(err)
 			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	default:
+		http.Error(res, internal.JsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		u := a.UserDB.GetAllUsers()
+		err := json.NewEncoder(res).Encode(u)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	case "POST":
+		var u struct {
+			Id       string `json:"id"`
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+
+		err := json.NewDecoder(req.Body).Decode(&u)
+		if err != nil {
+			http.Error(res, internal.JsonStatusBadRequest, http.StatusBadRequest)
+			return
+		}
+
+		usr, err := user.New(u.Id, u.Username, u.Password)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+			return
+		}
+
+		err = a.UserDB.AddUser(usr)
+		if err != nil {
+			if err == user.ErrDuplicatedUser {
+				http.Error(res, internal.JsonStatusConflict, http.StatusConflict)
+				return
+			}
+			log.Println(err)
+			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+			return
 		}
 	default:
 		http.Error(res, internal.JsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)

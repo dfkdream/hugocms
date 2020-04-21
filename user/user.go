@@ -59,6 +59,36 @@ func NewDB(db *bolt.DB) *DB {
 	}
 }
 
+func (u DB) GetAllUsers() []*User {
+	result := make([]*User, 0)
+	err := u.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("users"))
+		if b == nil {
+			return nil
+		}
+
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			u := new(User)
+			err := proto.Unmarshal(v, u)
+			if err != nil {
+				return err
+			}
+			result = append(result, u)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
+	return result
+}
+
 func (u DB) GetUser(id string) *User {
 	var uptr *User
 	err := u.db.View(func(tx *bolt.Tx) error {
