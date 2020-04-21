@@ -74,12 +74,12 @@ func (u DB) GetAllUsers() []*User {
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			u := new(User)
-			err := proto.Unmarshal(v, u)
+			usr := new(User)
+			err := proto.Unmarshal(v, usr)
 			if err != nil {
 				return err
 			}
-			result = append(result, u)
+			result = append(result, usr)
 		}
 
 		return nil
