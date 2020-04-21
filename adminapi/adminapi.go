@@ -407,6 +407,8 @@ func (a AdminAPI) SetupHandlers(router *mux.Router) {
 	router.HandleFunc("/build", a.buildAPI)
 	router.HandleFunc("/config", a.configAPI)
 	router.HandleFunc("/plugins", a.pluginsAPI)
+	router.HandleFunc("/users", a.usersAPI)
+	router.HandleFunc("/user/{id}", a.userAPI)
 
 	for _, v := range a.Conf.Plugins {
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
