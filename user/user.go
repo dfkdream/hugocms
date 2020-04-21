@@ -141,6 +141,16 @@ func (u DB) AddUser(user *User) error {
 	return ErrDuplicatedUser
 }
 
+func (u DB) DeleteUser(id string) error {
+	return u.db.Update(func(tx *bolt.Tx) error {
+		c := tx.Bucket(bucketKeyUsers)
+		if c == nil {
+			return nil
+		}
+		return c.Delete([]byte(id))
+	})
+}
+
 func (u DB) Size() int {
 	result := 0
 	_ = u.db.View(func(tx *bolt.Tx) error {
