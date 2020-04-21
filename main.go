@@ -36,6 +36,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	userBD := user.NewDB(db)
+
 	t, err := template.New("html").ParseGlob("./html/*.html")
 	if err != nil {
 		log.Fatal(err)
@@ -50,14 +52,14 @@ func main() {
 		"/admin/assets/",
 		"/admin/api/",
 		session.NewDB(true, 10*time.Minute),
-		user.NewDB(db),
+		userBD,
 		t)
 
 	rAdmin := r.PathPrefix("/admin").Subrouter().StrictSlash(true)
 
 	admin.Admin{SignIn: s, T: t, Config: cfg}.SetupHandlers(rAdmin)
 
-	adminapi.AdminAPI{Conf: cfg, Hugo: hg}.SetupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
+	adminapi.AdminAPI{Conf: cfg, Hugo: hg, UserDB: userBD}.SetupHandlers(rAdmin.PathPrefix("/api").Subrouter().StrictSlash(true))
 
 	pluginapi.PluginAPI{Config: cfg, SignIn: s}.SetupHandlers(r.PathPrefix("/api").Subrouter().StrictSlash(true))
 
