@@ -291,6 +291,11 @@ func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "GET":
 		u := a.UserDB.GetAllUsers()
+		for idx := range u {
+			u[idx].Hash = ""
+			u[idx].Salt = ""
+		}
+
 		err := json.NewEncoder(res).Encode(u)
 		if err != nil {
 			log.Println(err)
