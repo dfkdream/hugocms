@@ -336,6 +336,61 @@ func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (a AdminAPI) userAPI(res http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	u := a.UserDB.GetUser(id)
+	if u == nil {
+		http.Error(res, internal.JsonStatusNotFound, http.StatusNotFound)
+		return
+	}
+
+	switch req.Method {
+	case "GET":
+		u.Hash = ""
+		u.Salt = ""
+
+		err := json.NewEncoder(res).Encode(u)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	case "POST":
+		var value struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+
+		err := json.NewDecoder(req.Body).Decode(&value)
+		if err != nil {
+			http.Error(res, internal.JsonStatusBadRequest, http.StatusBadRequest)
+			return
+		}
+
+		if value.Username != "" {
+			u.Username = value.Username
+		}
+
+		if value.Password != "" {
+			u, err = user.New(u.Id, u.Username, value.Password)
+			if err != nil {
+				log.Println(err)
+				http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+				return
+			}
+		}
+
+		a.UserDB.SetUser(u)
+	case "DELETE":
+		err := a.UserDB.DeleteUser(u.Id)
+		if err != nil {
+			log.Println(err)
+			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+		}
+	default:
+		http.Error(res, internal.JsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
+	}
+}
+
 func (a AdminAPI) SetupHandlers(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
