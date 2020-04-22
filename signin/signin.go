@@ -148,6 +148,8 @@ func (s SignInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			HttpOnly: true,
 		})
 		http.Redirect(res, req, s.signInURL+"?redirect="+redirect, http.StatusFound)
+	default:
+		http.Error(res, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
 
