@@ -40,6 +40,8 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 
 	router.Handle("/signin", a.SignIn)
 
+	router.HandleFunc("/signout", a.SignIn.SignOut)
+
 	router.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/admin/list/", http.StatusFound)
 	})

@@ -157,3 +157,26 @@ func GetUser(req *http.Request) *user.User {
 	}
 	return nil
 }
+
+func (s SignInHandler) SignOut(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		key := mustReadCookie("sess", req)
+		if key != "" {
+			s.sessionDB.Unregister(key)
+
+			// Delete cookie
+			http.SetCookie(res, &http.Cookie{
+				Name:     "sess",
+				Value:    "",
+				Expires:  time.Unix(0, 0),
+				Path:     "/",
+				HttpOnly: true,
+			})
+
+			http.Redirect(res, req, s.signInURL, http.StatusFound)
+		}
+	default:
+		http.Error(res, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}

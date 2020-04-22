@@ -40,6 +40,12 @@ func (s *DB) Register(user *user.User, ip string) string {
 	return key
 }
 
+func (s *DB) Unregister(key string) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	delete(s.db, key)
+}
+
 func (s *DB) Validate(key string, ip string) (bool, *user.User) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
