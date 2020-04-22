@@ -219,6 +219,43 @@ func (a AdminAPI) whoamiAPI(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+	case "POST":
+		var values struct {
+			Username        string `json:"username"`
+			CurrentPassword string `json:"currentPassword"`
+			NewPassword     string `json:"newPassword"`
+		}
+
+		err := json.NewDecoder(req.Body).Decode(&values)
+		if err != nil {
+			http.Error(res, internal.JsonStatusBadRequest, http.StatusBadRequest)
+			return
+		}
+
+		u := signin.GetUser(req)
+		if u == nil {
+			http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+			return
+		}
+
+		if values.Username != "" {
+			u.Username = values.Username
+		}
+
+		if values.CurrentPassword != "" && values.NewPassword != "" {
+			if !u.Validate(u.Id, values.CurrentPassword) {
+				http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+				return
+			}
+			u, err = user.New(u.Id, u.Username, values.NewPassword, u.Permissions)
+			if err != nil {
+				log.Println(err)
+				http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
+				return
+			}
+		}
+
+		a.UserDB.SetUser(u)
 	default:
 		http.Error(res, internal.JsonStatusMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
