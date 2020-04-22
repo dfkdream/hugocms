@@ -8,15 +8,13 @@ import (
 	"path"
 	"time"
 
-	"github.com/dfkdream/hugocms/internal"
-
 	"github.com/dfkdream/hugocms/config"
+	"github.com/dfkdream/hugocms/internal"
+	"github.com/gorilla/mux"
 
 	"github.com/dfkdream/hugocms/signin"
 
 	"github.com/dfkdream/hugocms/user"
-
-	"github.com/gorilla/mux"
 )
 
 type Admin struct {
@@ -30,6 +28,20 @@ type templateVars struct {
 	Plugins []config.PluginData
 	Body    template.HTML
 	User    *user.User
+}
+
+func (a Admin) checkWritePermission(permission string, res http.ResponseWriter, req *http.Request) bool {
+	if !signin.GetUser(req).HasPermission(permission) {
+		res.WriteHeader(http.StatusForbidden)
+		err := a.T.ExecuteTemplate(res, "permission-denied.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
+		if err != nil {
+			log.Println(err)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+			return false
+		}
+		return false
+	}
+	return true
 }
 
 func (a Admin) SetupHandlers(router *mux.Router) {
@@ -47,6 +59,10 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	router.PathPrefix("/list/").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		if !a.checkWritePermission("hugocms:list", res, req) {
+			return
+		}
+
 		err := a.T.ExecuteTemplate(res, "list.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
 		if err != nil {
 			log.Println(err)
@@ -55,6 +71,10 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	router.PathPrefix("/edit").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		if !a.checkWritePermission("hugocms:edit", res, req) {
+			return
+		}
+
 		err := a.T.ExecuteTemplate(res, "edit.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
 		if err != nil {
 			log.Println(err)
@@ -63,6 +83,10 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	router.HandleFunc("/config", func(res http.ResponseWriter, req *http.Request) {
+		if !a.checkWritePermission("hugocms:config", res, req) {
+			return
+		}
+
 		err := a.T.ExecuteTemplate(res, "config.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
 		if err != nil {
 			log.Println(err)
@@ -71,6 +95,10 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	router.HandleFunc("/plugins", func(res http.ResponseWriter, req *http.Request) {
+		if !a.checkWritePermission("hugocms:plugins", res, req) {
+			return
+		}
+
 		err := a.T.ExecuteTemplate(res, "plugins.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
 		if err != nil {
 			log.Println(err)
@@ -79,6 +107,10 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	router.HandleFunc("/profile", func(res http.ResponseWriter, req *http.Request) {
+		if !a.checkWritePermission("hugocms:whoami", res, req) {
+			return
+		}
+
 		err := a.T.ExecuteTemplate(res, "profile.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
 		if err != nil {
 			log.Println(err)
@@ -89,6 +121,11 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	for _, v := range a.Config.Plugins {
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
 			http.StripPrefix("/admin/"+v.Metadata.Identifier, http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+				if !a.checkWritePermission("plugin:"+v.Metadata.Identifier, res, req) {
+					return
+				}
+
 				r, err := http.NewRequest("GET", internal.SingleJoiningSlash(v.Addr, path.Join("/admin", req.URL.Path)), nil)
 				if err != nil {
 					log.Println(err)

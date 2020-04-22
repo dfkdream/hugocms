@@ -1,6 +1,8 @@
 package user
 
-import "strings"
+import (
+	"strings"
+)
 
 func matchPermission(pattern, target string) bool {
 	p1s := strings.Split(pattern, ":")
@@ -24,6 +26,10 @@ func matchPermission(pattern, target string) bool {
 }
 
 func (m *User) HasPermission(permission string) bool {
+	if m == nil {
+		return false
+	}
+
 	for _, p := range m.GetPermissions() {
 		if matchPermission(permission, p) {
 			return true

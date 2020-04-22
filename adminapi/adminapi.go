@@ -34,6 +34,11 @@ type AdminAPI struct {
 }
 
 func (a AdminAPI) postAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:post") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		f, err := os.Open(filepath.Join(a.Conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
@@ -98,6 +103,11 @@ type fileInfo struct {
 }
 
 func (a AdminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:list") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		files, err := ioutil.ReadDir(filepath.Join(a.Conf.ContentPath, filepath.Clean("/"+req.URL.Path)))
@@ -154,6 +164,11 @@ func (a AdminAPI) listAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) blobAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:blob") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		if strings.HasSuffix("/", req.URL.Path) {
@@ -201,6 +216,11 @@ func (a AdminAPI) blobAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) whoamiAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:whoami") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		if u, ok := req.Context().Value(signin.ContextKeyUser).(*user.User); ok {
@@ -262,6 +282,11 @@ func (a AdminAPI) whoamiAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) buildAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:build") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "POST":
 		r := a.Hugo.Build()
@@ -279,6 +304,11 @@ func (a AdminAPI) buildAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) configAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:config") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		res.Header().Del("Content-Type")
@@ -308,6 +338,11 @@ type pluginInfo struct {
 }
 
 func (a AdminAPI) pluginsAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:plugins") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		i := make([]pluginInfo, len(a.Conf.Plugins))
@@ -325,6 +360,11 @@ func (a AdminAPI) pluginsAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:users") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	switch req.Method {
 	case "GET":
 		u := a.UserDB.GetAllUsers()
@@ -375,6 +415,11 @@ func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) userAPI(res http.ResponseWriter, req *http.Request) {
+	if !signin.GetUser(req).HasPermission("hugocms:user") {
+		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+		return
+	}
+
 	id := mux.Vars(req)["id"]
 	u := a.UserDB.GetUser(id)
 	if u == nil {
@@ -454,8 +499,14 @@ func (a AdminAPI) SetupHandlers(router *mux.Router) {
 	router.HandleFunc("/user/{id}", a.userAPI)
 
 	for _, v := range a.Conf.Plugins {
-		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
-			http.StripPrefix("/admin/api/"+v.Metadata.Identifier,
-				pluginapi.NewAuthenticatedReverseProxy(internal.SingleJoiningSlash(v.Addr, "/admin_api"))))
+		router.PathPrefix("/" + v.Metadata.Identifier).HandlerFunc(
+			func(res http.ResponseWriter, req *http.Request) {
+				if signin.GetUser(req).HasPermission("plugin:" + v.Metadata.Identifier) {
+					http.StripPrefix("/admin/api/"+v.Metadata.Identifier,
+						pluginapi.NewAuthenticatedReverseProxy(internal.SingleJoiningSlash(v.Addr, "/admin_api"), true)).ServeHTTP(res, req)
+				} else {
+					http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
+				}
+			})
 	}
 }

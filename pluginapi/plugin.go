@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
+func NewAuthenticatedReverseProxy(path string, authenticate bool) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{Director: func(req *http.Request) {
 		target, err := url.Parse(path)
 		if err != nil {
@@ -37,7 +37,7 @@ func NewAuthenticatedReverseProxy(path string) *httputil.ReverseProxy {
 
 		req.Header.Del("X-HugoCMS-User")
 
-		if u, ok := req.Context().Value(signin.ContextKeyUser).(*user.User); ok {
+		if u, ok := req.Context().Value(signin.ContextKeyUser).(*user.User); ok && authenticate {
 			u.Hash = ""
 			u.Salt = ""
 			req.Header.Set("X-HugoCMS-User", u.String())
@@ -53,8 +53,11 @@ type PluginAPI struct {
 func (p PluginAPI) SetupHandlers(router *mux.Router) {
 	router.Use(p.SignIn.Middleware(false))
 	for _, v := range p.Config.Plugins {
-		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
-			http.StripPrefix("/api/"+v.Metadata.Identifier,
-				NewAuthenticatedReverseProxy(internal.SingleJoiningSlash(v.Addr, "/api"))))
+		router.PathPrefix("/" + v.Metadata.Identifier).HandlerFunc(
+			func(res http.ResponseWriter, req *http.Request) {
+				http.StripPrefix("/api/"+v.Metadata.Identifier,
+					NewAuthenticatedReverseProxy(internal.SingleJoiningSlash(v.Addr, "/api"),
+						signin.GetUser(req).HasPermission("plugin:"+v.Metadata.Identifier))).ServeHTTP(res, req)
+			})
 	}
 }
