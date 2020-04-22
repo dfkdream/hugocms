@@ -60,9 +60,6 @@ passwordForm.onsubmit = (e) => {
     })
         .then(res => {
             if (!res.ok) return Promise.reject(res.json());
-            else return res.json();
-        })
-        .then(() => {
             popup.alert(document.body, "Success", "Password updated.");
             currentPassword.value = "";
             newPassword.value = "";
