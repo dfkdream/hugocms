@@ -26,9 +26,6 @@ profileForm.onsubmit = (e) => {
     })
         .then(res => {
             if (!res.ok) return Promise.reject(res.json());
-            else return res.json();
-        })
-        .then(() => {
             popup.alert(document.body, "Success", "Username updated.");
         })
         .catch(err => {
