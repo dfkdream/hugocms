@@ -1,0 +1,10 @@
+.profile-container{
+    margin: 0 auto;
+    padding: 1em;
+    max-width: 1400px;
+}
+
+.profile-container form{
+    max-width: 500px;
+    margin: 0 1em 2em;
+}

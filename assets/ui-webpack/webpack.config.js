@@ -17,7 +17,8 @@ module.exports = {
 		list: './src/js/list.js',
 		signin: './src/js/signin.js',
 		plugins: './src/js/plugins.js',
-		plugin: './src/js/plugin.js'
+		plugin: './src/js/plugin.js',
+		profile: './src/js/profile.js'
 	},
 	output: {
 		filename: '[name].bundle.js',
