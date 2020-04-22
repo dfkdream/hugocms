@@ -150,3 +150,10 @@ func (s SignInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, s.signInURL+"?redirect="+redirect, http.StatusFound)
 	}
 }
+
+func GetUser(req *http.Request) *user.User {
+	if u, ok := req.Context().Value(ContextKeyUser).(*user.User); ok {
+		return u
+	}
+	return nil
+}
