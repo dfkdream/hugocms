@@ -46,7 +46,7 @@ profileForm.onsubmit = (e) => {
 
 passwordForm.onsubmit = (e) => {
     e.preventDefault();
-    if (newPassword.value !== confirmPassword) {
+    if (newPassword.value !== confirmPassword.value) {
         popup.alert(document.body, "Confirmation Failed", "Password confirmation failed.");
         return;
     }
