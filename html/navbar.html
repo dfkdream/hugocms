@@ -8,7 +8,7 @@
             <a href="/admin/config" class="btn btn-link"><i class="fa fa-wrench"></i> Config</a>
             <a href="/admin/list/" class="btn btn-link"><i class="fa fa-sitemap"></i> Posts</a>
             <a href="/admin/plugins" class="btn btn-link"><i class="fa fa-plug"></i> Plugins</a>
-            {{- range . }}
+            {{- range .Plugins }}
             <div class="dropdown dropdown-right">
                 <span class="btn btn-link dropdown-toggle" tabindex="0">
                     {{ if .Metadata.Info.IconClass }}<i class="{{ .Metadata.Info.IconClass }}"></i> {{ end }}{{ .Metadata.Info.Name }} <i class="fa fa-caret-down"></i>
@@ -23,6 +23,28 @@
                 </ul>
             </div>
             {{- end }}
+            <div class="dropdown dropdown-right">
+                <span class="btn btn-link dropdown-toggle" tabindex="0">
+                    {{ .User.Username }} <i class="fa fa-caret-down"></i>
+                </span>
+                <ul class="menu">
+                    <li class="menu-item">
+                        <div class="tile tile-centered">
+                            <div class="tile-content">
+                                <div class="tile-title">{{ .User.Username }}</div>
+                                <small class="tile-subtitle text-gray">@{{ .User.Id }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="menu-item">
+                        <a href="/profile">Settings</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="/signout">Sign Out</a>
+                    </li>
+                </ul>
+            </div>
         </section>
     </header>
 {{ end }}
