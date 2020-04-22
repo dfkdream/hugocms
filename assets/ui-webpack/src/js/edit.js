@@ -168,7 +168,13 @@ fetch(endpoint)
     .catch(err=>{
         if (err instanceof Promise){
             err.then(json=>{
-                if (json.code===404) return;
+                if (json.code===404) {
+                    fetch("/admin/api/whoami")
+                        .then(res=>res.json())
+                        .then(json=>{
+                            author.value = json.username;
+                        })
+                }
                 popup.alert(document.body,"Error",`${json.code} ${json.message}`);
             })
                 .catch(()=>{
