@@ -39,8 +39,8 @@ func validatePassword(password, hash, salt string) bool {
 	return fmt.Sprintf("%x", hashed) == hash
 }
 
-func New(id, username, password string) (*User, error) {
-	u := User{Id: id, Username: username}
+func New(id, username, password string, permissions []string) (*User, error) {
+	u := User{Id: id, Username: username, Permissions: permissions}
 	var err error
 	u.Hash, u.Salt, err = hashPassword(password)
 	if err != nil {

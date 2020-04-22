@@ -303,9 +303,10 @@ func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
 		}
 	case "POST":
 		var u struct {
-			Id       string `json:"id"`
-			Username string `json:"username"`
-			Password string `json:"password"`
+			Id          string   `json:"id"`
+			Username    string   `json:"username"`
+			Password    string   `json:"password"`
+			Permissions []string `json:"permissions"`
 		}
 
 		err := json.NewDecoder(req.Body).Decode(&u)
@@ -314,7 +315,7 @@ func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		usr, err := user.New(u.Id, u.Username, u.Password)
+		usr, err := user.New(u.Id, u.Username, u.Password, u.Permissions)
 		if err != nil {
 			log.Println(err)
 			http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)
@@ -356,8 +357,9 @@ func (a AdminAPI) userAPI(res http.ResponseWriter, req *http.Request) {
 		}
 	case "POST":
 		var value struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
+			Username    string   `json:"username"`
+			Password    string   `json:"password"`
+			Permissions []string `json:"permissions"`
 		}
 
 		err := json.NewDecoder(req.Body).Decode(&value)
@@ -370,8 +372,12 @@ func (a AdminAPI) userAPI(res http.ResponseWriter, req *http.Request) {
 			u.Username = value.Username
 		}
 
+		if len(value.Permissions) > 0 {
+			u.Permissions = value.Permissions
+		}
+
 		if value.Password != "" {
-			u, err = user.New(u.Id, u.Username, value.Password)
+			u, err = user.New(u.Id, u.Username, value.Password, u.Permissions)
 			if err != nil {
 				log.Println(err)
 				http.Error(res, internal.JsonStatusInternalServerError, http.StatusInternalServerError)

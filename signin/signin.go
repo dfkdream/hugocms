@@ -111,7 +111,7 @@ func (s SignInHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if s.userDB.Size() == 0 { // Create admin user if DB is empty
-			u, err := user.New(id, "admin", password)
+			u, err := user.New(id, "admin", password, []string{"*"}) // grant all permissions
 			if err != nil {
 				log.Println(err)
 				http.Redirect(res, req, s.signInURL+"?redirect="+redirect, http.StatusFound)
