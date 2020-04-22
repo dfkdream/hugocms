@@ -78,6 +78,14 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 		}
 	})
 
+	router.HandleFunc("/profile", func(res http.ResponseWriter, req *http.Request) {
+		err := a.T.ExecuteTemplate(res, "profile.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
+		if err != nil {
+			log.Println(err)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		}
+	})
+
 	for _, v := range a.Config.Plugins {
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
 			http.StripPrefix("/admin/"+v.Metadata.Identifier, http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
