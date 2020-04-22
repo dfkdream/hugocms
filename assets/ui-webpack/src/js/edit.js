@@ -173,7 +173,8 @@ fetch(endpoint)
                         .then(res=>res.json())
                         .then(json=>{
                             author.value = json.username;
-                        })
+                        });
+                    return;
                 }
                 popup.alert(document.body,"Error",`${json.code} ${json.message}`);
             })
