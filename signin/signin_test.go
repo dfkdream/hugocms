@@ -9,7 +9,7 @@ import (
 
 func TestHashValidatePassword(t *testing.T) {
 	password := internal.GenerateRandomKey(32)
-	u, err := user.New("id", "username", password)
+	u, err := user.New("id", "username", password, []string{"*"})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
