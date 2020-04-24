@@ -80,6 +80,7 @@ const showEditUserPopup = (uid) => {
         const permissions = fragment.getElementById("permissions");
 
         id.setAttribute("disabled", "");
+        password.removeAttribute("required");
 
         const closePopup = () => {
             document.body.removeChild(popup);
