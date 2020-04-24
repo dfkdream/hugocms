@@ -108,6 +108,8 @@ const showEditUserPopup = (uid) => {
             });
 
         fragment.getElementById("modal-form").onsubmit = (e) => {
+            e.preventDefault();
+
             fetch("/admin/api/user/"+id,{
                 method:"POST",
                 body:JSON.stringify({
