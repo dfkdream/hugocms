@@ -27,8 +27,6 @@ const filepath = require('./filepath');
 
 const popup = require('./popup');
 
-const fileList = require('./filelist');
-
 const fpath = require('path');
 
 const filesPopup = require('./files-popup');
