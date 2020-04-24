@@ -360,7 +360,7 @@ func (a AdminAPI) pluginsAPI(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a AdminAPI) usersAPI(res http.ResponseWriter, req *http.Request) {
-	if !signin.GetUser(req).HasPermission("hugocms:users") {
+	if !signin.GetUser(req).HasPermission("hugocms:user") {
 		http.Error(res, internal.JsonStatusForbidden, http.StatusForbidden)
 		return
 	}

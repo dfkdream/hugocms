@@ -118,6 +118,18 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 		}
 	})
 
+	router.HandleFunc("/users", func(res http.ResponseWriter, req *http.Request) {
+		if !a.checkWritePermission("hugocms:user", res, req) {
+			return
+		}
+
+		err := a.T.ExecuteTemplate(res, "users.html", templateVars{Plugins: a.Config.Plugins, User: signin.GetUser(req)})
+		if err != nil {
+			log.Println(err)
+			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		}
+	})
+
 	for _, v := range a.Config.Plugins {
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
 			http.StripPrefix("/admin/"+v.Metadata.Identifier, http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
