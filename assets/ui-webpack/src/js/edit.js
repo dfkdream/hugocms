@@ -33,6 +33,8 @@ const filesPopup = require('./files-popup');
 
 import $ from "jquery";
 
+const publish = require('./publish');
+
 const path = location.pathname.replace(/^(\/admin\/edit)/,"");
 const endpoint = filepath.join("/admin/api/post", path);
 
@@ -194,6 +196,10 @@ document.getElementById("save").onclick=()=>{
                 popup.alert(document.body,"Save Error","Unknown error occurred.");
             }
         })
+};
+
+document.getElementById("publish").onclick = ()=>{
+    publish();
 };
 
 fetch(endpoint)
