@@ -1,0 +1,7 @@
+.console{
+    background-color: #3b4351;
+    color: white;
+    padding: 1em;
+    border-radius: 3px;
+    overflow-x: auto;
+}

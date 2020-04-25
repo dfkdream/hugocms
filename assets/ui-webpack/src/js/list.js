@@ -15,9 +15,10 @@ require('../css/style.css');
 require('../css/list.css');
 
 require('spectre.css/dist/spectre.min.css');
-require('spectre.css/dist/spectre-exp.min.css');
 
 require('../css/all.min.css');
+
+const publish = require('./publish');
 
 function fileToEndpoint(file){
    if (file.isDir) return "/admin/list";
@@ -30,11 +31,6 @@ function fileToEndpoint(file){
 }
 
 const path = location.pathname.replace(/^(\/admin\/list)/,"");
-
-const rebuildModal = document.getElementById("rebuild-modal");
-const rebuildModalTitle = document.getElementById("rebuild-modal-title");
-const rebuildModalResult = document.getElementById("rebuild-modal-result");
-const rebuildModalClose = document.getElementById("rebuild-modal-close");
 
 const locationHeader = document.getElementById("location");
 locationHeader.innerText=path;
@@ -139,26 +135,7 @@ document.getElementById("new-post").onclick=()=>{
 };
 
 document.getElementById("rebuild").onclick=()=>{
-    rebuildModalClose.setAttribute("disabled","");
-    rebuildModal.setAttribute("class","modal active");
-    rebuildModalTitle.innerText = "Rebuilding...";
-    rebuildModalResult.innerHTML = '<progress class="progress" max="100"/>';
-
-    fetch("/admin/api/build",{method:"POST"})
-        .then(resp=>resp.json())
-        .then(data=>{
-            rebuildModalTitle.innerText = (data.code===0?"Done":"Error");
-            rebuildModalResult.innerHTML="";
-            let res = document.createElement("pre");
-            res.setAttribute("class","console");
-            res.innerText = data.result;
-            rebuildModalResult.appendChild(res);
-            rebuildModalClose.removeAttribute("disabled");
-        });
-};
-
-rebuildModalClose.onclick = ()=>{
-    rebuildModal.setAttribute("class","modal");
+    publish();
 };
 
 document.getElementById("upload-file").onclick=()=>{
