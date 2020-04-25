@@ -32,3 +32,13 @@ div.tui-colorpicker-clearfix{
 .attachment-modal-container{
     max-width: 60em !important;
 }
+
+.tui-hugocms-file{
+    color: #555 !important;
+    font-weight: 700;
+    width: auto !important;
+}
+
+.tui-hugocms-file::after{
+    content: "Add File";
+}

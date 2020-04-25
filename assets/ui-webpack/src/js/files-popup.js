@@ -3,7 +3,7 @@ const filepath = require("./filepath");
 const popups = require('./popup');
 
 module.exports = (dir)=>{
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve)=>{
         let fragment = document.createDocumentFragment();
         let popup = document.createElement("div");
 
@@ -37,7 +37,7 @@ module.exports = (dir)=>{
                 }else{
                     switch(filepath.ext(file.name)){
                         case "md": case "html":
-                            popup.alert(document.body,"Error","Markdown or HTML files cannot be attached");
+                            popups.alert(document.body,"Error","Markdown or HTML files cannot be attached");
                             break;
                         default:
                             closePopup();

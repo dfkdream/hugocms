@@ -31,12 +31,66 @@ const fpath = require('path');
 
 const filesPopup = require('./files-popup');
 
+import $ from "jquery";
+
+const path = location.pathname.replace(/^(\/admin\/edit)/,"");
+const endpoint = filepath.join("/admin/api/post", path);
+
+Editor.defineExtension('files',(editor)=>{
+   if (editor.getUI().name==='default'){
+       const toolbar = editor.getUI().getToolbar();
+
+       toolbar.addItem('divider');
+
+       toolbar.addItem({
+           type:'button',
+           options:{
+               className: 'tui-hugocms-file',
+               command: 'fileClicked',
+               tooltip: 'Add File',
+               $el: $('<button class="tui-hugocms-file" type="button"></button>')
+           }
+       });
+
+       const addFileMarkdown = ()=>{
+           filesPopup(filepath.clean(filepath.join(path,"..")))
+               .then(res=>{
+                   if (res!==false) {
+                       const fn=fpath.relative(/^_?index(\..+)?\.(md|html|htm)$/i.test(fpath.basename(path))?fpath.dirname(path):path, res);
+                       switch (filepath.ext(fn).toLowerCase()){
+                           case "jpg": case "jpeg": case "png": case "bmp": case "gif": case "tiff": case "svg": case "webp":
+                               editor.insertText(`\n![${fn.split("/").pop()}](${fn})\n`);
+                               break;
+                           default:
+                               editor.insertText(`\n[${fn.split("/").pop()}](${fn})\n`);
+                               break;
+                       }
+                   }
+               })
+       };
+
+       editor.addCommand('markdown',{
+           name: 'fileClicked',
+           exec(){
+               addFileMarkdown();
+           }
+       });
+
+       editor.addCommand('wysiwyg',{
+           name: 'fileClicked',
+           exec(){
+               popup.alert(document.body,"Error","File link is only available in markdown mode now.")
+           }
+       });
+   }
+});
+
 const editor = new Editor({
     el: document.getElementById("editor"),
     initialEditType: 'markdown',
     previewStyle: 'vertical',
     height: '80vh',
-    exts: ['colorSyntax','scrollSync'],
+    exts: ['colorSyntax','scrollSync','files'],
     usageStatistics: false
 });
 
@@ -66,9 +120,6 @@ class optionsList{
         return this.target.selectedIndex;
     }
 }
-
-const path = location.pathname.replace(/^(\/admin\/edit)/,"");
-const endpoint = filepath.join("/admin/api/post", path);
 
 document.getElementById("location").innerText=path;
 
