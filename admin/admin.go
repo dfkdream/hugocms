@@ -71,7 +71,7 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	router.PathPrefix("/edit").HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		if !a.checkWritePermission("hugocms:edit", res, req) {
+		if !a.checkWritePermission("hugocms:post", res, req) {
 			return
 		}
 
