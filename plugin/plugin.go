@@ -106,3 +106,11 @@ func (p *Plugin) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 	p.router.ServeHTTP(res, req)
 }
+
+// GetUser returns user data retrieved from request
+func GetUser(req *http.Request) *user.User {
+	if u, ok := req.Context().Value(ContextKeyUser).(*user.User); ok {
+		return u
+	}
+	return nil
+}
