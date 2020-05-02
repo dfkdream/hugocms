@@ -53,6 +53,7 @@ type PluginAPI struct {
 func (p PluginAPI) SetupHandlers(router *mux.Router) {
 	router.Use(p.SignIn.Middleware(false))
 	for _, v := range p.Config.Plugins {
+		v := v
 		router.PathPrefix("/" + v.Metadata.Identifier).HandlerFunc(
 			func(res http.ResponseWriter, req *http.Request) {
 				http.StripPrefix("/api/"+v.Metadata.Identifier,

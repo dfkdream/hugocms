@@ -131,6 +131,7 @@ func (a Admin) SetupHandlers(router *mux.Router) {
 	})
 
 	for _, v := range a.Config.Plugins {
+		v := v
 		router.PathPrefix("/" + v.Metadata.Identifier).Handler(
 			http.StripPrefix("/admin/"+v.Metadata.Identifier, http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 

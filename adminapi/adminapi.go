@@ -499,6 +499,7 @@ func (a AdminAPI) SetupHandlers(router *mux.Router) {
 	router.HandleFunc("/user/{id}", a.userAPI)
 
 	for _, v := range a.Conf.Plugins {
+		v := v
 		router.PathPrefix("/" + v.Metadata.Identifier).HandlerFunc(
 			func(res http.ResponseWriter, req *http.Request) {
 				if signin.GetUser(req).HasPermission("plugin:" + v.Metadata.Identifier) {
