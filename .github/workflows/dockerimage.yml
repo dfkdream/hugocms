@@ -19,7 +19,7 @@ jobs:
           echo "::set-env name=SHA8::$(git rev-parse --short=8 $GITHUB_SHA)"
 
       - name: Build the Docker image
-        run: docker build --tag "hugocms:$LATEST_VERSION.$SHA8" --tag hugocms:latest .
+        run: docker build --tag "hugocms:$LATEST_VERSION.$SHA8" --tag hugocms:latest --build-arg mode=production .
 
       - name: Upload image to GitHub packages
         run: |
