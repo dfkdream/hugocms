@@ -4,9 +4,33 @@ RUN apk update && apk upgrade
 
 WORKDIR /hugocms
 
-COPY . .
+COPY ./admin ./admin
 
-RUN find . -type f ! -name '*.go' -and ! -name 'go.*' -delete
+COPY ./adminapi ./adminapi
+
+COPY ./article ./article
+
+COPY ./config ./config
+
+COPY ./hugo ./hugo
+
+COPY ./internal ./internal
+
+COPY ./plugin ./plugin
+
+COPY ./pluginapi ./pluginapi
+
+COPY ./protowrapper ./protowrapper
+
+COPY ./session ./session
+
+COPY ./signin ./signin
+
+COPY ./user ./user
+
+COPY ./*.go ./
+
+COPY ./go.* ./
 
 RUN go get
 
@@ -24,7 +48,9 @@ RUN npm install
 
 COPY ./assets/ui-webpack .
 
-RUN npx webpack --mode production
+ARG mode
+
+RUN npx webpack --mode $mode
 
 FROM alpine
 
