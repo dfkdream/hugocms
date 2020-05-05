@@ -5,14 +5,6 @@
  * Copyright 2020 dfkdream
  * Released under MIT License
  */
-require('tui-editor/dist/tui-editor-extScrollSync');
-require('tui-editor/dist/tui-editor-extColorSyntax');
-
-require('codemirror/lib/codemirror.css');
-require('tui-editor/dist/tui-editor.min.css');
-require('tui-editor/dist/tui-editor-contents.min.css');
-require('tui-color-picker/dist/tui-color-picker.min.css');
-require('highlight.js/styles/github.css');
 
 require('../css/edit.css');
 require('../css/style.css');
@@ -21,90 +13,96 @@ require('spectre.css/dist/spectre.min.css');
 
 require('../css/all.min.css');
 
-const Editor = require('tui-editor');
+import Editor from "@toast-ui/editor";
+import "codemirror/lib/codemirror.css";
+import "@toast-ui/editor/dist/toastui-editor.css";
 
-const filepath = require('./filepath');
+import colorSyntax from "@toast-ui/editor-plugin-color-syntax";
+import "tui-color-picker/dist/tui-color-picker.css"
 
+import codeSyntaxHighlight from "@toast-ui/editor-plugin-code-syntax-highlight";
+import hljs from "highlight.js";
+import 'highlight.js/styles/github.css';
 import popups from "./popup";
-
-const fpath = require('path');
-
 import filesPopup from "./files-popup";
-
-import $ from "jquery";
 
 import publish from "./publish";
 
 import {i18n} from "../i18n";
 
-i18n().then(t=> {
-    const popup=new popups(t);
+const filepath = require('./filepath');
+
+const fpath = require('path');
+
+i18n().then(t => {
+    const popup = new popups(t);
 
     const path = location.pathname.replace(/^(\/admin\/edit)/, "");
     const endpoint = filepath.join("/admin/api/post", path);
 
-    Editor.defineExtension('files', (editor) => {
-        if (editor.getUI().name === 'default') {
-            const toolbar = editor.getUI().getToolbar();
+    function files(editor) {
+        const addFileMarkdown = () => {
+            filesPopup(filepath.clean(filepath.join(path, "..")),t)
+                .then(res => {
+                    if (res !== false) {
+                        const fn = fpath.relative(/^_?index(\..+)?\.(md|html|htm)$/i.test(fpath.basename(path)) ? fpath.dirname(path) : path, res);
+                        switch (filepath.ext(fn).toLowerCase()) {
+                            case "jpg":
+                            case "jpeg":
+                            case "png":
+                            case "bmp":
+                            case "gif":
+                            case "tiff":
+                            case "svg":
+                            case "webp":
+                                editor.insertText(`\n![${fn.split("/").pop()}](${fn})\n`);
+                                break;
+                            default:
+                                editor.insertText(`\n[${fn.split("/").pop()}](${fn})\n`);
+                                break;
+                        }
+                    }
+                })
+        };
 
-            toolbar.addItem('divider');
+        if (!editor.isViewer()&&editor.getUI().name==="default"){
+            const toolbar = editor.getUI().getToolbar();
+            toolbar.addItem("divider");
+            const buttonEl = document.createElement("button");
+            buttonEl.className="tui-hugocms-file";
 
             toolbar.addItem({
-                type: 'button',
+                type: "button",
                 options: {
-                    className: 'tui-hugocms-file',
                     command: 'fileClicked',
                     tooltip: t("addFile"),
-                    $el: $('<button class="tui-hugocms-file" type="button"></button>')
+                    el: buttonEl
                 }
             });
 
-            const addFileMarkdown = () => {
-                filesPopup(filepath.clean(filepath.join(path, "..")),t)
-                    .then(res => {
-                        if (res !== false) {
-                            const fn = fpath.relative(/^_?index(\..+)?\.(md|html|htm)$/i.test(fpath.basename(path)) ? fpath.dirname(path) : path, res);
-                            switch (filepath.ext(fn).toLowerCase()) {
-                                case "jpg":
-                                case "jpeg":
-                                case "png":
-                                case "bmp":
-                                case "gif":
-                                case "tiff":
-                                case "svg":
-                                case "webp":
-                                    editor.insertText(`\n![${fn.split("/").pop()}](${fn})\n`);
-                                    break;
-                                default:
-                                    editor.insertText(`\n[${fn.split("/").pop()}](${fn})\n`);
-                                    break;
-                            }
-                        }
-                    })
-            };
-
-            editor.addCommand('markdown', {
+            editor.addCommand('markdown',{
                 name: 'fileClicked',
-                exec() {
+                exec(){
                     addFileMarkdown();
                 }
             });
 
-            editor.addCommand('wysiwyg', {
+            editor.addCommand('wysiwyg',{
                 name: 'fileClicked',
-                exec() {
+                exec(){
                     popup.alert(document.body, t("error"), t("errFileLinkMarkdownOnly"))
                 }
             });
         }
-    });
+    }
 
     const editor = new Editor({
         el: document.getElementById("editor"),
         initialEditType: 'markdown',
         previewStyle: 'vertical',
         height: '80vh',
-        exts: ['colorSyntax', 'scrollSync', 'files'],
+        //exts: ['colorSyntax', 'scrollSync', 'files'],
+        plugins: [colorSyntax, [codeSyntaxHighlight, {hljs}],files],
         usageStatistics: false
     });
 
@@ -152,7 +150,7 @@ i18n().then(t=> {
     };
 
     document.getElementById("attachment-add").onclick = () => {
-        filesPopup(filepath.clean(filepath.join(path, "..")),t)
+        filesPopup(filepath.clean(filepath.join(path, "..")), t)
             .then(res => {
                 if (res !== false) {
                     attachments.append(
