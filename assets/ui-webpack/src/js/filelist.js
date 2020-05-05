@@ -6,7 +6,8 @@
  * Released under MIT License
  */
 const filepath = require('./filepath');
-const popup = require('./popup');
+
+import popup from "./popup";
 
 require('../css/filelist.css');
 
@@ -29,14 +30,18 @@ function fileToIcon(file){
     }
 }
 
-module.exports = class fileList{
-    constructor(config){
+class fileList{
+    constructor(config,t){
         this.path = config.path?config.path:"/";
         this.onclickCallback = config.onclickCallback?
             config.onclickCallback:file=>this.navigate(filepath.clean(filepath.join(this.path,file.name)));
         this.endpoint = config.endpoint?config.endpoint:"/admin/api/list";
         this.target = config.target;
         this.actions = config.actions;
+
+        this.t = t;
+
+        this.popup = new popup(t);
 
         this.build()
     }
@@ -104,13 +109,15 @@ module.exports = class fileList{
                     err.then(json => {
                         if (json.code === 404) location.href = "/admin/list/";
                         else if (json.code === 403) location.reload();
-                        else popup.alert(document.body, "Error", `${json.code} ${json.message}`);
+                        else this.popup.alert(document.body, this.t("error"), `${json.code} ${json.message}`);
                     })
-                        .catch(() => popup.alert(document.body, "Error", "Unknown error occurred. Please reload."));
+                        .catch(() => this.popup.alert(document.body, this.t("error"), this.t("errUnknown")));
                 }else{
                     console.log(err);
-                    popup.alert(document.body, "Error", "Unknown error occurred. Please reload.");
+                    this.popup.alert(document.body, this.t("error"), this.t("errUnknown"));
                 }
             });
     }
-};
+}
+
+export default fileList;

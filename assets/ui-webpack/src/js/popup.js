@@ -23,14 +23,22 @@ async function uploadFiles(path,files,callback){
     }
 }
 
-module.exports = {
-    confirm: (target, title, msg)=>{
+import {i18nDOM} from "../i18n";
+
+class popup{
+    constructor(t){
+        this.t = t;
+    }
+
+    confirm(target, title, msg){
         return new Promise((resolve)=>{
             let fragment = document.createDocumentFragment();
             let popup = document.createElement("div");
             popup.setAttribute("class","modal active");
             popup.innerHTML = require("../html/confirm.html");
             fragment.append(popup);
+
+            i18nDOM(this.t,fragment);
 
             fragment.getElementById("title").innerText = title;
             fragment.getElementById("content").innerText = msg;
@@ -55,15 +63,17 @@ module.exports = {
 
             yes.focus();
         });
-    },
+    }
 
-    prompt: (target,title,msg)=>{
+    prompt(target,title,msg){
         return new Promise((resolve)=>{
             let fragment = document.createDocumentFragment();
             let popup = document.createElement("div");
             popup.setAttribute("class","modal active");
             popup.innerHTML = require("../html/prompt.html");
             fragment.append(popup);
+
+            i18nDOM(this.t,fragment);
 
             let input = fragment.getElementById("input");
 
@@ -97,15 +107,17 @@ module.exports = {
 
             input.focus();
         });
-    },
+    }
 
-    alert:(target,title,msg)=>{
+    alert(target,title,msg){
         return new Promise((resolve)=>{
             let fragment = document.createDocumentFragment();
             let popup = document.createElement("div");
             popup.setAttribute("class","modal active");
             popup.innerHTML = require("../html/alert.html");
             fragment.append(popup);
+
+            i18nDOM(this.t,fragment);
 
             fragment.getElementById("title").innerText = title;
             fragment.getElementById("content").innerText = msg;
@@ -124,15 +136,17 @@ module.exports = {
 
             ok.focus();
         });
-    },
+    }
 
-    upload:(target,uploadPath)=>{
+    upload(target,uploadPath){
         return new Promise((resolve)=>{
             let fragment = document.createDocumentFragment();
             let popup = document.createElement("div");
             popup.setAttribute("class","modal active");
             popup.innerHTML = require("../html/upload.html");
             fragment.append(popup);
+
+            i18nDOM(this.t,fragment);
 
             const uploadModalTitle = fragment.getElementById("upload-modal-title");
             const uploadModalContent = fragment.getElementById("upload-modal-content");
@@ -141,7 +155,7 @@ module.exports = {
 
             uploadModalUpload.setAttribute("disabled","");
             uploadModalClose.removeAttribute("disabled");
-            uploadModalTitle.innerText = "Upload File";
+            uploadModalTitle.innerText = this.t("uploadFile");
             uploadModalContent.innerHTML="";
             let inputFile = document.createElement("input");
             inputFile.setAttribute("type","file");
@@ -154,7 +168,7 @@ module.exports = {
             };
 
             uploadModalUpload.onclick = ()=>{
-                uploadModalTitle.innerText = "Uploading...";
+                uploadModalTitle.innerText = this.t("uploading");
                 uploadModalContent.innerHTML="";
                 uploadModalClose.setAttribute("disabled","");
                 uploadModalUpload.setAttribute("disabled","");
@@ -185,4 +199,6 @@ module.exports = {
             target.appendChild(fragment);
         })
     }
-};
+}
+
+export default popup

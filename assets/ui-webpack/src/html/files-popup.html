@@ -1,27 +1,27 @@
 <div class="modal-overlay" id="modal-overlay"></div>
 <div class="modal-container attachment-modal-container">
     <div class="modal-header">
-        <div class="modal-title h5" id="attachment-modal-title">Select File</div>
+        <div class="modal-title h5" id="attachment-modal-title" data-i18n="selectFile">Select File</div>
     </div>
     <div class="modal-body">
         <div class="location-header">
             <h5 id="file-modal-path">Loading...</h5>
-            <button class="btn btn-primary" id="upload-file"><i class="fas fa-file-upload"></i>Upload File</button>
+            <button class="btn btn-primary" id="upload-file"><i class="fas fa-file-upload"></i><span data-i18n="uploadFile">Upload File</span></button>
         </div>
         <table class="table table-striped table-hover">
             <thead>
             <tr>
-                <th>Filename</th>
-                <th>Size</th>
-                <th>Mode</th>
-                <th>ModTime</th>
-                <th>Actions</th>
+                <th data-i18n="filename">Filename</th>
+                <th data-i18n="size">Size</th>
+                <th data-i18n="mode">Mode</th>
+                <th data-i18n="modTime">ModTime</th>
+                <th data-o18n="actions">Actions</th>
             </tr>
             </thead>
             <tbody id="attachment-modal-list"></tbody>
         </table>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-link" id="cancel">Cancel</button>
+        <button class="btn btn-link" id="cancel" data-i18n="cancel">Cancel</button>
     </div>
 </div>

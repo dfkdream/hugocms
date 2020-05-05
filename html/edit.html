@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <link>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HugoCMS Editor</title>
@@ -12,15 +13,15 @@
         <div class="location-header">
             <h1 id="location">Loading...</h1>
             <div>
-                <a class="btn btn-primary" id="raw" href="#" target="_blank"><i class="fas fa-file-alt"></i>Raw</a>
-                <button class="btn btn-primary" id="save"><i class="fas fa-save"></i>Save</button>
-                <button class="btn btn-primary" id="publish"><i class="fas fa-paper-plane"></i>Publish</button>
+                <a class="btn btn-primary" id="raw" href="#" target="_blank"><i class="fas fa-file-alt"></i><span data-i18n="raw">Raw</span></a>
+                <button class="btn btn-primary" id="save"><i class="fas fa-save"></i><span data-i8n="save">Save</span></button>
+                <button class="btn btn-primary" id="publish"><i class="fas fa-paper-plane"></i><span data-i18n="publish">Publish</span></button>
             </div>
         </div>
         <div class="form-horizontal form-info">
             <div class="form-group">
                 <div class="col-3 col-sm-12">
-                    <label class="form-label" for="title">Title</label>
+                    <label class="form-label" for="title" data-i18n="title">Title</label>
                 </div>
                 <div class="col-9 col-sm-12">
                     <input class="form-input" type="text" id="title" placeholder="Title"/>
@@ -28,7 +29,7 @@
             </div>
             <div class="form-group">
                 <div class="col-3 col-sm-12">
-                    <label class="form-label" for="subtitle">Subtitle</label>
+                    <label class="form-label" for="subtitle" data-i18n="subtitle">Subtitle</label>
                 </div>
                 <div class="col-9 col-sm-12">
                     <input class="form-input" type="text" id="subtitle" placeholder="Subtitle"/>
@@ -36,18 +37,18 @@
             </div>
             <div class="form-group">
                 <div class="col-3 col-sm-12">
-                    <label class="form-label" for="date">Publish Date</label>
+                    <label class="form-label" for="date" data-i18n="publishDate">Publish Date</label>
                 </div>
                 <div class="col-9 col-sm-12">
                     <div class="input-group">
                         <input class="form-input" type="date" id="date"/>
-                        <button class="btn btn-primary input-group-btn" id="date-now">Now</button>
+                        <button class="btn btn-primary input-group-btn" id="date-now" data-i18n="now">Now</button>
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-3 col-sm-12">
-                    <label class="form-label" for="author">Author</label>
+                    <label class="form-label" for="author" data-i18n="author">Author</label>
                 </div>
                 <div class="col-9 col-sm-12">
                     <input class="form-input" type="text" id="author" placeholder="Author"/>
@@ -55,7 +56,7 @@
             </div>
             <div class="form-group">
                 <div class="col-3 col-sm-12">
-                    <label class="form-label" for="attachments">Attachments</label>
+                    <label class="form-label" for="attachments" data-i18n="attachments">Attachments</label>
                 </div>
                 <div class="input-group col-9 col-sm-12">
                         <select class="form-select col-10" id="attachments"></select>
@@ -69,7 +70,7 @@
                         <input class="form-checkbox" type="checkbox" id="show-reading-time" checked>
                     </div>
                     <div class="col-11">
-                        <label class="form-label" for="show-reading-time">Show Reading Time</label>
+                        <label class="form-label" for="show-reading-time" data-i18n="showReadingTime">Show Reading Time</label>
                     </div>
                 </div>
                 <div class="form-group col-3 col-sm-12">
@@ -77,7 +78,7 @@
                         <input class="form-checkbox" type="checkbox" id="show-languages" checked>
                     </div>
                     <div class="col-11">
-                        <label class="form-label" for="show-languages">Show Languages</label>
+                        <label class="form-label" for="show-languages" data-i18n="showLanguages">Show Languages</label>
                     </div>
                 </div>
                 <div class="form-group col-3 col-sm-12">
@@ -85,7 +86,7 @@
                         <input class="form-checkbox" type="checkbox" id="show-author" checked>
                     </div>
                     <div class="col-11">
-                        <label class="form-label" for="show-author">Show Author</label>
+                        <label class="form-label" for="show-author" data-i18n="showAuthor">Show Author</label>
                     </div>
                 </div>
                 <div class="form-group col-3 col-sm-12">
@@ -93,7 +94,7 @@
                         <input class="form-checkbox" type="checkbox" id="show-date" checked>
                     </div>
                     <div class="col-11">
-                        <label class="form-label" for="show-date">Show Date</label>
+                        <label class="form-label" for="show-date" data-i18n="showDate">Show Date</label>
                     </div>
                 </div>
             </div>

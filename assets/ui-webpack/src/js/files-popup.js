@@ -1,8 +1,14 @@
-const fileList = require('./filelist');
-const filepath = require("./filepath");
-const popups = require('./popup');
+import fileList from "./filelist";
 
-module.exports = (dir)=>{
+const filepath = require("./filepath");
+
+import popup from "./popup";
+
+import {i18nDOM} from "../i18n";
+
+export function filesPopup (dir,t){
+    const popups = new popup(t);
+
     return new Promise((resolve)=>{
         let fragment = document.createDocumentFragment();
         let popup = document.createElement("div");
@@ -10,6 +16,8 @@ module.exports = (dir)=>{
         popup.setAttribute("class","modal active");
         popup.innerHTML = require("../html/files-popup.html");
         fragment.append(popup);
+
+        i18nDOM(t,fragment);
 
         const closePopup = ()=>{
             document.body.removeChild(popup);
@@ -37,7 +45,7 @@ module.exports = (dir)=>{
                 }else{
                     switch(filepath.ext(file.name)){
                         case "md": case "html":
-                            popups.alert(document.body,"Error","Markdown or HTML files cannot be attached");
+                            popups.alert(document.body,t("error"),t("errCannotAttachMDorHTML"));
                             break;
                         default:
                             closePopup();
@@ -50,7 +58,7 @@ module.exports = (dir)=>{
                     icon: "fas fa-trash-alt",
                     tooltip: "Delete",
                     callback:file=>{
-                        popups.confirm(document.body,"Confirm Delete", `Delete ${file.name}?`)
+                        popups.confirm(document.body,t("confirmDelete"), `Delete ${file.name}?`)
                             .then(confirm=>{
                                 if (confirm){
                                     if (file.isDir){
@@ -112,7 +120,7 @@ module.exports = (dir)=>{
                             });
                     }
                 }]
-        });
+        },t);
 
         fragment.getElementById("upload-file").onclick = ()=>{
             popups.upload(document.body,filepath.join("/admin/api/blob",f.path))
@@ -123,4 +131,6 @@ module.exports = (dir)=>{
 
         document.body.appendChild(popup);
     })
-};
+}
+
+export default filesPopup;

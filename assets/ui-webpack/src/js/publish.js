@@ -1,13 +1,17 @@
 require("../css/publish.css");
 require('spectre.css/dist/spectre-exp.min.css');
 
-module.exports = () => {
+import {i18nDOM} from "../i18n";
+
+export function publish(t){
     return new Promise((resolve, reject) => {
         let fragment = document.createDocumentFragment();
         let popup = document.createElement("div");
         popup.setAttribute("class", "modal active");
         popup.innerHTML = require("../html/publish.html");
         fragment.append(popup);
+
+        i18nDOM(t,fragment);
 
         const title = fragment.getElementById("title");
         const result = fragment.getElementById("result");
@@ -19,7 +23,7 @@ module.exports = () => {
                 return resp.json();
             })
             .then(json => {
-                title.innerText = json.code === 0 ? "Published" : "Publish Error";
+                title.innerText = json.code === 0 ? t("published") : t("publishError");
                 result.innerHTML = "";
                 let res = document.createElement("pre");
                 res.setAttribute("class", "console");
@@ -38,4 +42,6 @@ module.exports = () => {
 
         document.body.appendChild(fragment);
     });
-};
+}
+
+export default publish;

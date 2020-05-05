@@ -9,30 +9,30 @@
 <body>
 {{ template "navbar" . }}
 <div class="profile-container">
-    <h1>User Settings</h1>
-    <h2>Profile</h2>
+    <h1 data-i18n="userSettings">User Settings</h1>
+    <h2 data-i18n="profile">Profile</h2>
     <form id="form-profile">
         <div class="form-group">
-            <label class="form-label" for="username">Username</label>
+            <label class="form-label" for="username" data-i18n="username">Username</label>
             <input class="form-input" type="text" id="username" placeholder="Username" value="{{ .User.Username }}" required>
         </div>
-        <button type="submit" class="btn btn-success">Update profile</button>
+        <button type="submit" class="btn btn-success" data-i18n="updateProfile">Update profile</button>
     </form>
-    <h2>Password</h2>
+    <h2 data-i18n="password">Password</h2>
     <form id="form-password">
         <div class="form-group">
-            <label class="form-label" for="current-password">Current password</label>
+            <label class="form-label" for="current-password" data-i18n="currentPassword">Current password</label>
             <input class="form-input" type="password" id="current-password" placeholder="Current password" required>
         </div>
         <div class="form-group">
-            <label class="form-label" for="new-password">New password</label>
+            <label class="form-label" for="new-password" data-i18n="newPassword">New password</label>
             <input class="form-input" type="password" id="new-password" placeholder="New password" required>
         </div>
         <div class="form-group">
-            <label class="form-label" for="confirm-password">Password confirmation</label>
+            <label class="form-label" for="confirm-password" data-i18n="passwordConfirmation">Password confirmation</label>
             <input class="form-input" type="password" id="confirm-password" placeholder="Password confirmation" required>
         </div>
-        <button type="submit" class="btn btn-success">Update password</button>
+        <button type="submit" class="btn btn-success" data-i18n="updatePassword">Update password</button>
     </form>
 </div>
 <script src="/admin/assets/profile.bundle.js"></script>

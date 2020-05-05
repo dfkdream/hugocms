@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "ace-builds": "^1.4.8",
+    "i18next": "^19.4.4",
+    "i18next-browser-languagedetector": "^4.1.1",
     "spectre.css": "^0.5.8",
     "tui-color-picker": "^2.2.6",
     "tui-editor": "^1.4.10"
