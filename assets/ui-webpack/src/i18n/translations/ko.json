@@ -53,7 +53,7 @@
   "showAuthor": "작성자 표시",
   "showDate": "발행일 표시",
   "hugoConfiguration": "Hugo 설정",
-  "AddFile": "파일 추가",
+  "addFile": "파일 추가",
   "saved": "저장되었습니다.",
   "rename": "이름 바꾸기",
   "newDirectory": "새로운 디렉토리",
@@ -72,5 +72,6 @@
   "no": "아니오",
   "yes": "네",
   "profile": "프로필",
-  "editUser": "사용자 수정"
+  "editUser": "사용자 수정",
+  "selectFile": "파일 선택"
 }
