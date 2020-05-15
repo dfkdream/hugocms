@@ -73,5 +73,6 @@
   "yes": "네",
   "profile": "프로필",
   "editUser": "사용자 수정",
-  "selectFile": "파일 선택"
+  "selectFile": "파일 선택",
+  "gotoPage": "페이지로 이동"
 }

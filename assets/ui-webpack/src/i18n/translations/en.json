@@ -72,5 +72,6 @@
   "no": "No",
   "yes": "Yes",
   "profile": "Profile",
-  "selectFile": "Select File"
+  "selectFile": "Select File",
+  "gotoPage": "Go To Page"
 }
