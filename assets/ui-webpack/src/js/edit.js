@@ -169,6 +169,15 @@ i18n().then(t => {
 
     document.getElementById("raw").setAttribute("href", filepath.join("/admin/api/blob", path));
 
+    let publicPath = fpath.dirname(path);
+    let filename = fpath.basename(path);
+    if (!/^_?index(\..+)?\.(md|html|htm)$/i.test(filename)){
+        publicPath = fpath.join(publicPath,filename.split(".")[0]);
+    }
+    publicPath=fpath.join("/",publicPath);
+
+    document.getElementById("page").setAttribute("href",publicPath);
+
     document.getElementById("save").onclick = () => {
         fetch(endpoint, {
             method: "POST",
