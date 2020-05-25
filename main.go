@@ -69,18 +69,19 @@ func main() {
 
 	logged := handlers.LoggingHandler(os.Stdout, r)
 
-	log.Println("HTTP Server started at", cfg.Bind)
-
 	if cfg.TLS && cfg.AutoCert {
 		if cfg.Domain == "" {
 			log.Fatal("autocert: domain must not be empty string")
 		}
+		log.Println("HTTPS Server started at", cfg.Domain+":443")
 		log.Fatal(http.Serve(autocert.NewListener(cfg.Domain), logged))
 	} else if cfg.TLS {
+		log.Println("HTTPS Server started at", cfg.Bind)
 		if err := http.ListenAndServeTLS(cfg.Bind, cfg.CertPath, cfg.KeyPath, logged); err != nil {
 			log.Fatal(err)
 		}
 	} else {
+		log.Println("HTTP Server started at", cfg.Bind)
 		if err := http.ListenAndServe(cfg.Bind, logged); err != nil {
 			log.Fatal(err)
 		}
