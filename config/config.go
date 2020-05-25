@@ -29,6 +29,8 @@ type Config struct {
 	BoltPath    string
 	Bind        string
 	TLS         bool
+	AutoCert    bool
+	Domain      string
 	CertPath    string
 	KeyPath     string
 	Plugins     []PluginData
@@ -48,6 +50,8 @@ func GetConfig() *Config {
 		Bind:     getEnvStringOr("BIND", "0.0.0.0:80"),
 		BoltPath: getEnvStringOr("BOLT", "./bolt.db"),
 		TLS:      getEnvBoolOr("TLS", false),
+		AutoCert: getEnvBoolOr("AUTOCERT", false),
+		Domain:   getEnvStringOr("DOMAIN", ""),
 		CertPath: getEnvStringOr("CERT", "./cert.pem"),
 		KeyPath:  getEnvStringOr("KEY", "./key.pem"),
 		Plugins:  make([]PluginData, 0),

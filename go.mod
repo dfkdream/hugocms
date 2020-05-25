@@ -7,5 +7,5 @@ require (
 	github.com/golang/protobuf v1.3.5
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
-	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
+	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 )

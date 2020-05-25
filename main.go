@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/crypto/acme/autocert"
+
 	"github.com/dfkdream/hugocms/pluginapi"
 
 	"github.com/dfkdream/hugocms/adminapi"
@@ -73,6 +75,11 @@ func main() {
 		if err := http.ListenAndServeTLS(cfg.Bind, cfg.CertPath, cfg.KeyPath, logged); err != nil {
 			log.Fatal(err)
 		}
+	} else if cfg.AutoCert {
+		if cfg.Domain == "" {
+			log.Fatal("autocert: domain must not be empty string")
+		}
+		log.Fatal(http.Serve(autocert.NewListener(cfg.Domain), logged))
 	} else {
 		if err := http.ListenAndServe(cfg.Bind, logged); err != nil {
 			log.Fatal(err)
